@@ -200,6 +200,8 @@ ol.plan li:first-child{border-top:0}
 .ovmapbox{height:360px;margin-top:20px}
 .pin span{display:flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;color:#fff;font:700 12px/1 var(--f-mono);border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.35)}
 .leaflet-container{font-family:var(--f-body)}
+.arrow span{display:block;width:0;height:0;margin:1px 0 0 2px;border-top:7px solid transparent;border-bottom:7px solid transparent;border-left:13px solid;filter:drop-shadow(0 0 1.5px #fff) drop-shadow(0 0 1px #fff)}
+.maphint{font-size:12px;color:var(--muted);margin-top:6px}
 </style>
 
 <style>body{margin:0}</style>
@@ -597,29 +599,43 @@ function drawMaps(){
   _maps.forEach(m => m.remove()); _maps = [];
   if (!window.L) return;
   const css = getComputedStyle(document.documentElement);
-  const mk = (el, pts, color, labelled) => {
+  const mk = (el, seq, color) => {
+    // seq: ordered stops [{ll, name}], may revisit a place (e.g. back to the hotel)
     const m = L.map(el, {scrollWheelZoom:false, attributionControl:true});
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom:18, attribution:'&copy; OpenStreetMap'}).addTo(m);
-    const ll = pts.map(p => p.ll);
-    if (ll.length > 1) L.polyline(ll, {color, weight:3, opacity:.8, dashArray:'6 6'}).addTo(m);
-    pts.forEach((p, i) => {
-      const icon = L.divIcon({className:'pin', html:`<span style="background:${color}">${labelled ? i + 1 : ''}</span>`, iconSize:[24,24], iconAnchor:[12,12]});
-      L.marker(p.ll, {icon}).addTo(m).bindTooltip(p.name, {direction:'top', offset:[0,-10]});
+    const P = ll => L.CRS.EPSG3857.project(L.latLng(ll));
+    for (let i = 0; i < seq.length - 1; i++) {
+      const a = seq[i].ll, b = seq[i + 1].ll;
+      if (a[0] === b[0] && a[1] === b[1]) continue;
+      L.polyline([a, b], {color, weight:3, opacity:.75, dashArray:'6 6'}).addTo(m);
+      const pa = P(a), pb = P(b);
+      const deg = Math.atan2(-(pb.y - pa.y), pb.x - pa.x) * 180 / Math.PI;
+      [0.42].forEach(f => {
+        const mid = L.CRS.EPSG3857.unproject(L.point(pa.x + (pb.x - pa.x) * f, pa.y + (pb.y - pa.y) * f));
+        const icon = L.divIcon({className:'arrow', html:`<span style="transform:rotate(${deg}deg);border-left-color:${color}"></span>`, iconSize:[16,16], iconAnchor:[8,8]});
+        L.marker(mid, {icon, interactive:false, keyboard:false}).addTo(m);
+      });
+    }
+    const first = new Map();
+    seq.forEach((s, i) => { const k = s.ll.join(','); if (!first.has(k)) first.set(k, {s, nums:[i + 1]}); else first.get(k).nums.push(i + 1); });
+    first.forEach(({s, nums}) => {
+      const icon = L.divIcon({className:'pin', html:`<span style="background:${color}">${nums[0]}</span>`, iconSize:[24,24], iconAnchor:[12,12]});
+      L.marker(s.ll, {icon}).addTo(m).bindTooltip(nums.length > 1 ? `${s.name}（第 ${nums.join('、')} 站）` : s.name, {direction:'top', offset:[0,-10]});
     });
-    if (ll.length === 1) m.setView(ll[0], 14); else m.fitBounds(ll, {padding:[28,28]});
+    const ll = [...first.values()].map(v => v.s.ll);
+    if (ll.length === 1) m.setView(ll[0], 14); else m.fitBounds(ll, {padding:[30,30]});
     _maps.push(m);
   };
   const dm = document.getElementById('daymap');
   if (dm) {
     const d = DAYS[state.day];
-    const seen = new Set(); const pts = [];
-    (d.route || []).forEach(n => { if (!seen.has(n) && COORDS[n]) { seen.add(n); pts.push({ll:COORDS[n], name:PLABEL[n] || n}); } });
-    if (pts.length) mk(dm, pts, css.getPropertyValue(d.c.slice(4, -1)).trim() || '#333', true); else dm.hidden = true;
+    const seq = (d.route || []).filter(n => COORDS[n]).map(n => ({ll:COORDS[n], name:PLABEL[n] || n}));
+    if (seq.length) mk(dm, seq, css.getPropertyValue(d.c.slice(4, -1)).trim() || '#333'); else dm.hidden = true;
   }
   const om = document.getElementById('ovmap');
   if (om) {
     const pts = groups.map(g => ({ll:[SEGMENTS[g.seg].lat, SEGMENTS[g.seg].lon], name:SEGMENTS[g.seg].name}));
-    mk(om, pts, css.getPropertyValue('--ink').trim(), true);
+    mk(om, pts, css.getPropertyValue('--ink').trim());
   }
 }
 const COLORS = {lap:"var(--lap)",par:"var(--par)",ven:"var(--ven)",flo:"var(--flo)",rom:"var(--rom)"};
@@ -715,7 +731,7 @@ function renderDay(){
       <div class="nav"><button data-go="${state.day - 1}" ${prev ? "" : "disabled"} aria-label="前一天">← 前一天</button><button data-go="${state.day + 1}" ${next ? "" : "disabled"} aria-label="後一天">後一天 →</button></div></div>
     <h2>${esc(d.city)}</h2>
     <div class="theme">${esc(d.theme)}</div>
-    <div id="daymap" class="daymap"></div>
+    <div id="daymap" class="daymap"></div><div class="maphint">數字是當天的順序，箭頭是移動方向；滑過或點地點看名稱</div>
     ${routeUrl(d) ? `<a class="routebtn" href="${routeUrl(d)}" target="_blank" rel="noopener">在 Google 地圖看今天路線<span>${d.route.length} 個地點</span></a>` : ""}
     <dl class="facts"><div><dt>住宿</dt><dd>${esc(d.stay)}</dd></div><div><dt>交通</dt><dd>${esc(d.transport)}</dd></div><div><dt>氣溫</dt><dd>${esc(d.temp)}</dd></div></dl>
     <div class="sec-t">今日行程</div>
