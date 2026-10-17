@@ -1,0 +1,818 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<title>聖誕跨年蜜月</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@400;700&family=Noto+Sans+TC:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: 左側依城市分段的日程欄 + 右側單日詳情；手機改為頂部橫向日期列。顏色代表過夜城市。 */
+:root{
+  --bg:#F3F5F7; --surface:#FFFFFF; --ink:#18212E; --muted:#5D6878; --line:#DCE1E8; --soft:#E9EDF2;
+  --accent:#18212E;
+  --lap:#2F6DB0; --par:#A23E6A; --ven:#16807C; --flo:#A9741A; --rom:#B4472E;
+  --ok:#2E7D4F; --warn:#9A6B00; --gyg:#D9480F;
+  --f-display:"LXGW WenKai TC","Noto Serif TC",serif;
+  --f-body:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,"SFMono-Regular",monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#10151D; --surface:#18202B; --ink:#E8ECF2; --muted:#98A3B3; --line:#2A3443; --soft:#202A37; --accent:#E8ECF2;
+  --lap:#7FB0E6; --par:#E386AE; --ven:#5CC7C1; --flo:#E2B25E; --rom:#EE8C72; --ok:#6CC892; --warn:#E3B84F; --gyg:#FF8A5B; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#10151D; --surface:#18202B; --ink:#E8ECF2; --muted:#98A3B3; --line:#2A3443; --soft:#202A37; --accent:#E8ECF2;
+  --lap:#7FB0E6; --par:#E386AE; --ven:#5CC7C1; --flo:#E2B25E; --rom:#EE8C72; --ok:#6CC892; --warn:#E3B84F; --gyg:#FF8A5B; color-scheme:dark}
+
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.65;-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;padding:0}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--c,var(--ink));outline-offset:2px;border-radius:6px}
+.wrap{max-width:1180px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+
+/* header */
+header.top{padding-block:22px 10px}
+.top-row{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px 24px}
+h1{font-family:var(--f-display);font-weight:700;font-size:clamp(24px,4vw,34px);line-height:1.2;margin:0;text-wrap:balance}
+.sub{color:var(--muted);font-size:13.5px;margin-top:4px}
+.count{font-family:var(--f-mono);font-size:12.5px;color:var(--muted);text-align:right;white-space:nowrap}
+.count b{display:block;font-family:var(--f-display);font-size:26px;color:var(--ink);line-height:1.1;font-weight:700}
+.segbar{display:flex;gap:3px;margin-top:16px;height:8px;border-radius:4px;overflow:hidden}
+.segbar span{background:var(--c);opacity:.85}
+.seglegend{display:flex;flex-wrap:wrap;gap:4px 14px;margin-top:8px;font-size:12.5px;color:var(--muted)}
+.seglegend i{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--c);margin-right:5px;vertical-align:1px}
+
+/* tabs */
+.tabs-wrap{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--bg);border-bottom:1px solid var(--line)}
+.tabs{display:flex;gap:4px;padding-block:8px;overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{white-space:nowrap;padding:7px 14px;border-radius:999px;font-size:14px;font-weight:500;color:var(--muted)}
+.tab[aria-selected="true"]{background:var(--ink);color:var(--bg)}
+.tab .n{font-family:var(--f-mono);font-size:11px;margin-left:4px;opacity:.75}
+
+/* day strip (mobile) */
+.strip{display:none;overflow-x:auto;scrollbar-width:none;gap:6px;padding-block:8px 10px;scroll-snap-type:x proximity}
+.strip::-webkit-scrollbar{display:none}
+.chip{flex:0 0 auto;scroll-snap-align:center;min-width:58px;padding:6px 8px;border-radius:10px;border:1px solid var(--line);background:var(--surface);text-align:center;line-height:1.25}
+.chip .d{font-family:var(--f-mono);font-size:11px;color:var(--c)}
+.chip .dt{font-weight:700;font-size:14px}
+.chip .wk{font-size:11px;color:var(--muted)}
+.chip[aria-current="true"]{background:var(--c);border-color:var(--c);color:var(--surface)}
+.chip[aria-current="true"] .d,.chip[aria-current="true"] .wk{color:inherit;opacity:.9}
+
+/* layout */
+.layout{display:grid;grid-template-columns:270px minmax(0,1fr);gap:28px;padding-block:20px 60px}
+aside.side{position:sticky;top:calc(env(safe-area-inset-top,0px) + 62px);align-self:start;max-height:calc(100vh - 80px);overflow-y:auto;padding-right:4px}
+.sgroup{margin-bottom:14px}
+.sgroup h3{font-size:12px;letter-spacing:.08em;color:var(--c);margin:0 0 4px 10px;font-weight:700}
+.sgroup h3 small{color:var(--muted);font-weight:400;letter-spacing:0;margin-left:6px}
+.srow{display:grid;grid-template-columns:44px 1fr;gap:8px;align-items:center;width:100%;text-align:left;padding:7px 10px;border-radius:10px;border-left:3px solid transparent}
+.srow:hover{background:var(--soft)}
+.srow .dt{font-family:var(--f-mono);font-size:12.5px;line-height:1.2}
+.srow .dt small{display:block;color:var(--muted);font-size:11px}
+.srow .nm{font-size:14px;line-height:1.35;min-width:0}
+.srow[aria-current="true"]{background:var(--surface);border-left-color:var(--c);box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.srow[aria-current="true"] .nm{font-weight:700}
+
+/* day detail */
+.day-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px}
+.dlabel{font-family:var(--f-mono);font-size:13px;color:var(--c);font-weight:600}
+.dlabel span{color:var(--muted);font-weight:400;margin-left:8px}
+.nav{display:flex;gap:6px}
+.nav button{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:5px 12px;font-size:13px}
+.nav button:disabled{opacity:.35;cursor:default}
+.day h2{font-family:var(--f-display);font-weight:700;font-size:clamp(26px,3.6vw,36px);line-height:1.2;margin:8px 0 2px;text-wrap:balance}
+.theme{color:var(--muted);font-size:15px}
+.routebtn{display:inline-flex;align-items:center;gap:8px;margin-top:12px;padding:7px 14px;border-radius:999px;background:var(--c);color:var(--surface);text-decoration:none;font-size:14px;font-weight:500}
+.routebtn span{font-size:12px;opacity:.85;font-family:var(--f-mono)}
+.facts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-top:18px}
+.facts div{background:var(--surface);padding:10px 14px;min-width:0}
+.facts dt{font-size:11.5px;color:var(--muted);letter-spacing:.06em}
+.facts dd{margin:2px 0 0;font-size:13.5px;line-height:1.45}
+.sec-t{font-size:12px;letter-spacing:.12em;color:var(--muted);font-weight:700;margin:28px 0 10px}
+ol.plan{list-style:none;margin:0;padding:0;position:relative}
+ol.plan li{display:grid;grid-template-columns:76px minmax(0,1fr);gap:14px;padding:12px 0;border-top:1px solid var(--line)}
+ol.plan li:first-child{border-top:0}
+.tm{font-family:var(--f-mono);font-size:14px;font-weight:600;color:var(--c);font-variant-numeric:tabular-nums;padding-top:1px}
+.pt{font-weight:700;font-size:16px;line-height:1.4}
+.pd{color:var(--muted);font-size:14px;margin-top:2px}
+.maplink{display:inline-block;font-size:12px;margin-top:5px;color:var(--c);text-decoration:none;border-bottom:1px dotted currentColor}
+.hl{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.hl div{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.tag{display:inline-block;font-size:11px;font-weight:700;color:var(--c);border:1px solid var(--c);border-radius:999px;padding:0 8px;line-height:18px}
+.hl b{display:block;margin-top:6px;font-size:15px}
+.hl p{margin:3px 0 0;color:var(--muted);font-size:13.5px}
+.tips{background:var(--soft);border-radius:12px;padding:12px 16px;font-size:14px}
+.daytodo{display:flex;flex-direction:column;gap:6px}
+.foot-nav{display:flex;justify-content:space-between;gap:10px;margin-top:32px;padding-top:16px;border-top:1px solid var(--line)}
+.foot-nav button{text-align:left;padding:8px 12px;border-radius:10px;border:1px solid var(--line);background:var(--surface);font-size:13px;max-width:48%}
+.foot-nav button:last-child{text-align:right;margin-left:auto}
+.foot-nav small{display:block;color:var(--muted);font-size:11.5px}
+
+/* todo rows */
+.todo{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:9px 12px;font-size:14px}
+.st{font-size:11.5px;font-weight:700;border-radius:999px;padding:1px 9px;white-space:nowrap}
+.st.todo-s{color:var(--warn);background:color-mix(in srgb,var(--warn) 14%,transparent)}
+.st.done-s{color:var(--ok);background:color-mix(in srgb,var(--ok) 14%,transparent)}
+.todo small{display:block;color:var(--muted);font-size:12.5px}
+.todo .on{font-family:var(--f-mono);font-size:12px;color:var(--c)}
+.todo button.on{border-bottom:1px dotted currentColor}
+
+/* overview */
+.ov{display:grid;grid-template-columns:minmax(0,1fr) 240px;gap:28px;padding-block:20px 60px}
+.ovlist{display:flex;flex-direction:column}
+.ovrow{display:grid;grid-template-columns:62px minmax(0,1fr) minmax(0,.9fr);gap:14px;padding:12px 10px;border-top:1px solid var(--line);text-align:left;width:100%;border-left:3px solid var(--c)}
+.ovrow:hover{background:var(--surface)}
+.ovrow .dt{font-family:var(--f-mono);font-size:13px;line-height:1.3}
+.ovrow .dt small{display:block;color:var(--muted)}
+.ovrow .city{font-weight:700;font-size:15px;line-height:1.35}
+.ovrow .acts{color:var(--muted);font-size:13px;margin-top:2px}
+.ovrow .stay{font-size:13px;color:var(--muted);line-height:1.45}
+.ovrow .stay b{display:block;color:var(--ink);font-weight:500;font-size:11.5px;letter-spacing:.06em;color:var(--muted)}
+.routebox{position:sticky;top:calc(env(safe-area-inset-top,0px) + 70px);align-self:start}
+.routebox svg{width:100%;height:auto;display:block}
+.routebox .cap{font-size:12px;color:var(--muted);margin-top:6px}
+.segsum{display:flex;flex-direction:column;gap:6px;margin-top:14px;font-size:13px}
+.segsum div{display:flex;justify-content:space-between;gap:8px;border-bottom:1px solid var(--line);padding-bottom:5px}
+.segsum b{color:var(--c)}
+
+.bk{padding-block:20px 60px;max-width:760px}
+.bk .prog{display:flex;align-items:center;gap:12px;margin-bottom:16px;font-size:14px}
+.bk .bar{flex:1;height:6px;background:var(--soft);border-radius:3px;overflow:hidden}
+.bk .bar span{display:block;height:100%;background:var(--ok)}
+.bk .list{display:flex;flex-direction:column;gap:6px}
+.note{color:var(--muted);font-size:13px;margin-top:12px}
+.lead{color:var(--muted);font-size:14px;margin:0 0 18px}
+.st.wait-s{color:var(--muted);background:var(--soft)}
+.gyg{display:inline-flex;flex-wrap:wrap;align-items:baseline;gap:4px 8px;margin-top:6px;padding:4px 12px;border-radius:999px;border:1px solid var(--gyg);color:var(--gyg);text-decoration:none;font-size:13px;font-weight:700}
+.gyg span{font-weight:400;font-size:12px;color:var(--muted)}
+.gyg:hover{background:color-mix(in srgb,var(--gyg) 10%,transparent)}
+.todo small b{font-weight:700;color:var(--ok)}
+.todo small b.soon{color:var(--warn)}
+.legs{display:flex;flex-direction:column;gap:8px}
+.leg{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:11px 14px}
+.leg-top{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px}
+.mode{font-size:11.5px;font-weight:700;color:var(--c);border:1px solid var(--c);border-radius:999px;padding:0 8px;line-height:19px;white-space:nowrap}
+.route{font-weight:700;font-size:15px;flex:1;min-width:0}
+.leg .on{font-family:var(--f-mono);font-size:12px;border-bottom:1px dotted currentColor}
+.how{font-size:14px;margin-top:5px}
+.ltip{font-size:13px;color:var(--muted);margin-top:3px}
+.trgroup{margin-bottom:22px}
+.trgroup h3{font-size:13px;letter-spacing:.06em;color:var(--c);margin:0 0 8px}
+.trgroup h3 small{color:var(--muted);font-weight:400;margin-left:8px;font-family:var(--f-mono);letter-spacing:0}
+.prep{display:grid;grid-template-columns:minmax(0,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.prep div{background:var(--surface);padding:10px 14px}
+.prep dt{font-weight:700;font-size:14.5px}
+.prep dd{margin:2px 0 0;font-size:14px;color:var(--muted)}
+.need{font-size:11px;font-weight:700;margin-left:8px;padding:1px 8px;border-radius:999px;background:var(--soft);color:var(--ink)}
+
+@media (max-width:860px){
+  .layout{grid-template-columns:minmax(0,1fr);padding-top:12px}
+  aside.side{display:none}
+  .strip{display:flex}
+  .ov{grid-template-columns:minmax(0,1fr)}
+  .routebox{position:static;order:-1;max-width:420px}
+  .routebox svg{max-height:300px}
+}
+@media (max-width:560px){
+  .facts{grid-template-columns:minmax(0,1fr)}
+  .hl{grid-template-columns:minmax(0,1fr)}
+  ol.plan li{grid-template-columns:58px minmax(0,1fr);gap:10px}
+  .ovrow{grid-template-columns:54px minmax(0,1fr)}
+  .ovrow .stay{grid-column:2}
+  .count{text-align:left}
+  .nav{display:none}
+  .todo{grid-template-columns:auto minmax(0,1fr)}
+  .todo .on{grid-column:2;justify-self:start}
+}
+@media (prefers-reduced-motion:no-preference){
+  .day{animation:fade .25s ease}
+  @keyframes fade{from{opacity:.4;transform:translateY(4px)}to{opacity:1;transform:none}}
+}
+.daymap{height:300px;border-radius:12px;border:1px solid var(--line);margin-top:16px;z-index:0;background:var(--soft)}
+.ovmapbox{height:360px;margin-top:20px}
+.pin span{display:flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;color:#fff;font:700 12px/1 var(--f-mono);border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.35)}
+.leaflet-container{font-family:var(--f-body)}
+</style>
+
+<style>body{margin:0}</style>
+</head>
+<body>
+<header class="top wrap">
+  <div class="top-row">
+    <div>
+      <h1 id="tripTitle"></h1>
+      <div class="sub" id="tripSub"></div>
+    </div>
+    <div class="count" id="countdown"></div>
+  </div>
+  <div class="segbar" id="segbar"></div>
+  <div class="seglegend" id="seglegend"></div>
+</header>
+
+<div class="tabs-wrap">
+  <div class="wrap">
+    <div class="tabs" role="tablist">
+      <button class="tab" role="tab" id="tab-day" data-tab="day">每日行程</button>
+      <button class="tab" role="tab" id="tab-ov" data-tab="ov">總覽</button>
+      <button class="tab" role="tab" id="tab-tr" data-tab="tr">交通</button>
+      <button class="tab" role="tab" id="tab-bk" data-tab="bk">預訂與準備<span class="n" id="bkCount"></span></button>
+    </div>
+    <div class="strip" id="strip"></div>
+  </div>
+</div>
+
+<main class="wrap" id="main"></main>
+
+<script>
+/* ==================================================================
+   行程資料：要改行程只改這一段
+   - START：第一天的日期，之後每天的日期與星期會自動算
+   - SEGMENTS：過夜城市分段（顏色、名稱）
+   - DAYS：照順序排，每天一筆；新增/刪除/調換順序後 D 編號與日期自動重排
+       seg     過夜城市（對應 SEGMENTS 的 key）
+       route   Google 地圖路線上的地點（照順序）；rmode = walking/driving/transit
+       plan    時間軸 { t 時間, title, desc, map(可選：Google 地圖搜尋字) }
+       hl      亮點 { tag, title, desc }
+   - BOOKINGS 預訂清單、LEGS 交通、PREP 出發前準備、GUIDES 導遊（各自上方有欄位說明）
+   ================================================================== */
+const TRIP = {
+  title: "聖誕跨年蜜月",
+  route: "12/18 深夜出發 · 台北 → 羅瓦涅米 → 巴黎迪士尼 → 威尼斯 → 佛羅倫斯 → 羅馬 → 台北",
+  START: "2026-12-19",
+};
+
+const SEGMENTS = {
+  lap: { name: "羅瓦涅米", country: "芬蘭", lat: 66.50, lon: 25.73 },
+  par: { name: "巴黎・迪士尼", country: "法國", lat: 48.86, lon: 2.35 },
+  ven: { name: "威尼斯", country: "義大利", lat: 45.44, lon: 12.33 },
+  flo: { name: "佛羅倫斯", country: "義大利", lat: 43.77, lon: 11.26 },
+  rom: { name: "羅馬", country: "義大利", lat: 41.90, lon: 12.50 },
+};
+
+const DAYS = [
+  { seg:"lap", city:"台北 → 羅瓦涅米", short:"抵達極圈", theme:"啟程・極夜的召喚",
+    route:["Rovaniemi Airport", "Rovaniemi city centre"], rmode:"driving",
+    plan:[
+      {t:"前晚深夜", title:"12/18 桃園出發", desc:"台北沒有直飛芬蘭，搭夜班機到香港或東京，轉芬蘭航空飛赫爾辛基"},
+      {t:"清晨", title:"赫爾辛基轉國內線", desc:"入境申根、行李直掛到羅瓦涅米；快閃 Moomin 咖啡，買極光手套"},
+      {t:"中午前後", title:"抵達羅瓦涅米", desc:"雪地接駁進市區，呼吸第一口 -15°C 的清冽"},
+      {t:"下午", title:"市區飯店 Check-in", desc:"市中心的設計旅店；補眠、市區散步", map:"Rovaniemi city centre"},
+    ],
+    hl:[
+      {tag:"氛圍", title:"極夜初體驗", desc:"下午就天黑，整個城市泡在藍調時刻裡，像水彩暈開"},
+      {tag:"住宿", title:"市區設計旅店", desc:"北歐原木＋暖光，在雪地裡像一座燈塔"},
+    ],
+    tips:"轉機總共約 18–20 小時，機上就換上發熱衣、多喝水。第一天只排入住和散步，讓身體適應溫差與時差。羅瓦涅米機場很小，出關後接駁櫃檯就在門口。",
+    stay:"羅瓦涅米市區飯店", transport:"台北 → 香港/東京 → 赫爾辛基 → 羅瓦涅米（航班待訂）", temp:"-12°C ~ -18°C・白天很短" },
+
+  { seg:"lap", city:"聖誕老人村・馴鹿・哈士奇", short:"聖誕老人村", theme:"童話成真・跨越北極圈",
+    route:["Rovaniemi city centre","Santa Claus Village Rovaniemi"], rmode:"driving",
+    plan:[
+      {t:"09:30", title:"飯店接送出發", desc:"GetYourGuide 一日行程，業者到 市區飯店 接人，借你們保暖衣"},
+      {t:"上午", title:"馴鹿雪橇 + 哈士奇雪橇", desc:"在森林裡只聽得到鈴鐺；哈士奇起跑那一刻的爆發力，會讓人直接尖叫"},
+      {t:"中午", title:"鮭魚湯午餐", desc:"芬蘭傳統鮭魚湯（有素食選項）"},
+      {t:"下午", title:"跨越北極圈・聖誕老人村", desc:"手牽手跨越 66°33′；自由時間去聖誕老人郵局，寄一封給一年後的自己", map:"Santa Claus Village Rovaniemi"},
+    ],
+    hl:[
+      {tag:"必訪", title:"聖誕老人辦公室", desc:"自由時間可以排隊見聖誕老人，記得說是蜜月；拍照是另外收費"},
+      {tag:"儀式", title:"北極圈線", desc:"在村裡的北極圈線拍跨越瞬間，可以加買北極圈證書"},
+    ],
+    tips:"行程約 6 小時，含接送、午餐和保暖衣。12 月接送時間大約在早上 9–11 點，前一天會通知。郵局明信片要寫中文＋英文地址，選聖誕期間寄出會在明年聖誕才到，超適合當週年禮。",
+    stay:"市區飯店・同一間，不用搬行李", transport:"行程業者接送", temp:"-15°C ~ -20°C・體感更冷" },
+
+  { seg:"lap", city:"雪地摩托・換到玻璃屋", short:"雪地摩托", theme:"雪地心跳・極光玻璃屋",
+    route:["Rovaniemi city centre","Santa Claus Village Rovaniemi"], rmode:"driving",
+    plan:[
+      {t:"09:00", title:"退房、寄放行李", desc:"行李先放在 市區飯店 櫃台"},
+      {t:"上午", title:"雪地摩托 Arctic Safari", desc:"走到市中心 Arctic GM 辦公室集合，搭巴士到森林基地；2 人共騎一台，騎約 1 小時，穿越結凍的河面和森林"},
+      {t:"15:00", title:"飯店桑拿", desc:"回 市區飯店 洗桑拿暖身，勇敢的話試試在雪地裡打滾"},
+      {t:"19:00", title:"森林玻璃屋入住", desc:"拿行李搭計程車約 15 分鐘；今晚屋頂就是星空劇場", map:"Santa Claus Village Rovaniemi"},
+    ],
+    hl:[
+      {tag:"體驗", title:"雪地摩托", desc:"2025 年的新車，每團最多 5 台，導遊有急救證照"},
+      {tag:"蜜月", title:"玻璃屋極光夜", desc:"關掉所有燈，窩在羽絨被裡等綠光漫舞，記得把相機架好"},
+    ],
+    tips:"雪地摩托一定要戴頭盔內的保暖頭套，否則風灌進來會頭痛；業者會借保暖連身衣。玻璃屋房內平板可以設定極光通知；強極光躺在床上就看得到，弱的要走到屋外。",
+    stay:"森林玻璃屋", transport:"步行到集合點・計程車到 玻璃屋", temp:"-18°C ~ -25°C・活動日注意保暖" },
+
+  { seg:"lap", city:"Ranua・最後極光狩獵", short:"北極動物園", theme:"白色王國・最後的極光",
+    route:["Santa Claus Village Rovaniemi", "Ranua Zoo", "Santa Claus Village Rovaniemi"], rmode:"driving",
+    plan:[
+      {t:"09:30", title:"Ranua 北極動物園", desc:"全球最北動物園，看北極熊在雪中打滾、北極狐睡成一團", map:"Ranua Wildlife Park"},
+      {t:"13:00", title:"營火午餐", desc:"園區小木屋烤香腸配熱莓果汁，超級芬蘭"},
+      {t:"16:30", title:"玻璃屋小憩", desc:"回屋補眠，泡澡看雪落"},
+      {t:"22:00", title:"極光雪鞋健行", desc:"嚮導帶著去無光害的沼澤，今晚是最後的狩獵"},
+    ],
+    hl:[
+      {tag:"動物", title:"北極熊", desc:"Ranua 的明星，在雪中散步的背影超孤獨又超美"},
+      {tag:"味覺", title:"營火烤肉", desc:"導遊會教你用芬蘭刀切香腸，是蜜月最野的午餐"},
+    ],
+    tips:"Ranua 車程 1 小時，來回都可能在車上睡著，記得帶頸枕。極光團若雲層厚，嚮導會開很遠，要有心理準備。",
+    stay:"森林玻璃屋・最後一夜玻璃屋", transport:"Ranua 團體巴士 + 夜間極光小巴", temp:"-20°C・風小，適合觀測" },
+
+  { seg:"par", city:"羅瓦涅米 → 巴黎迪士尼", short:"飛往巴黎", theme:"從極夜飛向燈火",
+    route:["Paris Charles de Gaulle Airport", "Disneyland Park Paris"], rmode:"driving",
+    plan:[
+      {t:"10:00", title:"最後的雪地早餐", desc:"樹屋早餐，窗外是粉色晨光；退房後請櫃台叫車去機場（約 10 分鐘）"},
+      {t:"中午", title:"RVN → HEL → CDG", desc:"同一張機票、行李直掛巴黎；申根境內不用再過海關"},
+      {t:"傍晚", title:"抵達巴黎 CDG", desc:"從 -20°C 到 8°C，脫掉厚重雪衣"},
+      {t:"晚上", title:"直接入住 迪士尼園區飯店", desc:"計程車約 40 分鐘，進房就看到點燈的睡美人城堡", map:"Disneyland Park Paris"},
+    ],
+    hl:[
+      {tag:"轉場", title:"飛行儀式", desc:"從北極圈到城堡飯店，蜜月從童話走進另一個童話"},
+      {tag:"省事", title:"落地直接住迪士尼", desc:"不先進巴黎市區，行李少搬一次，明天一早就能提早入園"},
+    ],
+    tips:"CDG 到迪士尼不適用巴黎市區的計程車固定價，跳表約 €70–100；也可以在 CDG 2 航廈搭 TGV，10 分鐘到 Marne-la-Vallée（要先訂票）。官方 Magical Shuttle 巴士便宜，但塞車可能要 1.5 小時。",
+    stay:"迪士尼園區飯店（3 晚）", transport:"芬蘭航空 RVN → HEL → CDG・計程車到迪士尼", temp:"5°C ~ 9°C・巴黎陰雨" },
+
+  { seg:"par", city:"平安夜・Disneyland Park", short:"平安夜迪士尼", theme:"平安夜・住進童話",
+    route:["Disneyland Park Paris", "Disneyland Park Paris"], rmode:"walking",
+    plan:[
+      {t:"08:30", title:"Extra Magic Time", desc:"住客提早一小時入園，從飯店專屬入口走進空無一人的城堡大道", map:"Disneyland Park Paris"},
+      {t:"10:00", title:"Fantasyland 經典設施", desc:"小小世界、彼得潘，趁人少先玩排隊長的"},
+      {t:"15:00", title:"回飯店休息", desc:"飯店就在園區門口，回房補眠、換衣服"},
+      {t:"19:30", title:"平安夜聖誕晚餐", desc:"飯店 Royal Banquet 自助餐，有角色來桌邊，米奇聖誕樹就在旁邊"},
+    ],
+    hl:[
+      {tag:"攝影", title:"空城堡拍照", desc:"提早入園的前 30 分鐘，是整趟蜜月最空的城堡"},
+      {tag:"秘訣", title:"平安夜氛圍", desc:"法國人的平安夜是家庭夜，樂園相對好逛"},
+    ],
+    tips:"平安夜晚餐約 60 天前開放預約（在迪士尼 App 或官網），現場幾乎全滿。Premier Access（快速通關）當天在 App 購買。",
+    stay:"迪士尼園區飯店・第二晚", transport:"步行入園", temp:"6°C・夜間 4°C 需大衣" },
+
+  { seg:"par", city:"聖誕正日・Frozen + 城堡", short:"聖誕迪士尼", theme:"聖誕正日・一整天的魔法",
+    route:["Disneyland Park Paris","Disney Adventure World Paris","Disneyland Park Paris"], rmode:"walking",
+    plan:[
+      {t:"08:30", title:"Disney Adventure World", desc:"住客提早一小時入園，直衝 World of Frozen 艾倫戴爾港口", map:"Disney Adventure World Paris"},
+      {t:"11:30", title:"Avengers Campus", desc:"漫威園區，午餐在聖誕市集吃烤起司＋熱紅酒"},
+      {t:"15:00", title:"走回 Disneyland Park", desc:"兩個園區走路 5 分鐘，看下午場的米奇聖誕遊行", map:"Disneyland Park Paris"},
+      {t:"夜間", title:"城堡夜間秀", desc:"睡美人城堡的投影燈光秀，抱緊一點；煙火只有跨年夜才放（時間看樂園 App）"},
+    ],
+    hl:[
+      {tag:"新園區", title:"World of Frozen", desc:"今年第一個聖誕季，艾莎城堡在雪中發光；Anna、Elsa 見面要搶虛擬排隊"},
+      {tag:"限定", title:"聖誕老人", desc:"聖誕季期間，聖誕老人在 Main Street 的 Disney Clothiers 店裡見客"},
+    ],
+    tips:"Anna 和 Elsa 的見面在 8:45 開放 App 虛擬排隊。多日門票本來就能兩個園區進出。聖誕當天人多，Frozen 一入園先去，再抽 Premier Access。",
+    stay:"迪士尼園區飯店・第三晚", transport:"全天步行・平均 18k 步", temp:"5°C・體感 2°C 風大" },
+
+  { seg:"par", city:"退房・La Vallée Village 精品購物 → 巴黎", short:"精品購物", theme:"購物日・把巴黎的閃亮帶回家",
+    route:["Disneyland Park Paris","La Vallée Village","Le Marais Paris"], rmode:"driving",
+    plan:[
+      {t:"09:30", title:"早餐、退房", desc:"行李直接帶上計程車，不用再回飯店拿"},
+      {t:"10:00", title:"La Vallée Village", desc:"計程車約 10 分鐘；一到先把行李寄放在接駁車下車區（1–4 件一天 €10），再輕鬆逛", map:"La Vallée Village"},
+      {t:"13:00", title:"村內午餐", desc:"逛累了在村裡的餐廳或咖啡店休息"},
+      {t:"16:00", title:"搭計程車進巴黎", desc:"領回行李，約 45–60 分鐘到瑪黑公寓", map:"Le Marais Paris"},
+    ],
+    hl:[
+      {tag:"購物", title:"精品 outlet", desc:"一百多家精品和設計師品牌的過季商品，就在迪士尼隔壁"},
+      {tag:"提醒", title:"想買當季新品", desc:"Chanel、Hermès、Louis Vuitton 這類品牌不在 outlet，要去巴黎市區的專櫃"},
+    ],
+    tips:"12/26 是週六人多，開門就到最好逛。同一家店消費滿 €100.01 可以退稅，結帳時要出示護照正本。退稅單要在離開歐盟時辦，這趟是在羅馬機場，退稅商品要隨身帶著給海關看。",
+    stay:"Le Marais 瑪黑公寓（2 晚）", transport:"計程車 迪士尼 → La Vallée Village → 瑪黑", temp:"7°C・逛街大多在戶外走廊" },
+
+  { seg:"par", city:"巴黎市區・羅浮宮", short:"巴黎漫步", theme:"巴黎・為妳們的家",
+    route:["Le Marais Paris", "Louvre Museum", "Merci 111 Boulevard Beaumarchais Paris", "Bateaux Parisiens Port de la Bourdonnais", "Le Jules Verne Paris"], rmode:"walking",
+    plan:[
+      {t:"09:00", title:"羅浮宮開門場", desc:"預約開門場，蒙娜麗莎前只有 10 個人", map:"Musée du Louvre"},
+      {t:"12:00", title:"瑪黑區・Merci & The Broken Arm", desc:"買蜜月紀念小物，巴黎設計師選物", map:"Merci Paris"},
+      {t:"16:00", title:"塞納河遊船", desc:"黃昏班，剛好天黑，鐵塔點燈"},
+      {t:"19:30", title:"艾菲爾鐵塔 Le Jules Verne 晚餐", desc:"二樓米其林，整座巴黎在腳下，蜜月最高潮", map:"Le Jules Verne Paris"},
+    ],
+    hl:[
+      {tag:"藝術", title:"羅浮宮清晨", desc:"9:30 進，11:00 出，不要貪心，只看德農館就夠"},
+      {tag:"蜜月", title:"Jules Verne", desc:"求婚聖地，記得跟侍者說是蜜月，會有手寫卡片"},
+    ],
+    tips:"Jules Verne 要正裝，男士不能穿球鞋。羅浮宮早上人最少，開門場要先上網預約時段。",
+    stay:"Le Marais 公寓・最後一夜", transport:"地鐵 1 號線・步行", temp:"8°C・適合走路" },
+
+  { seg:"ven", city:"巴黎 → 威尼斯", short:"飛往水都", theme:"午後・跌進水色裡",
+    route:["Venice Marco Polo Airport", "Piazza San Marco Venice"], rmode:"transit",
+    plan:[
+      {t:"10:00", title:"瑪黑最後咖啡", desc:"Boot Café 小白咖啡，帶走可麗露", map:"Boot Café Paris"},
+      {t:"13:30", title:"CDG → VCE", desc:"法航午後班，飛越阿爾卑斯山"},
+      {t:"16:00", title:"水上計程車進本島", desc:"從機場碼頭直接衝進大運河，第一次見威尼斯請尖叫"},
+      {t:"19:00", title:"小巷迷路晚餐", desc:"不在地圖上的小酒館，Cicchetti 配 Spritz"},
+    ],
+    hl:[
+      {tag:"交通", title:"水上計程車", desc:"120 歐但值得，行李不用拖石板路，直接到飯店門口水門"},
+      {tag:"夜景", title:"夜色威尼斯", desc:"遊客散場後的威尼斯，才是本地人的威尼斯"},
+    ],
+    tips:"早上搭計程車去 CDG，瑪黑在右岸，固定價 €56。威尼斯本島拖行李箱是災難，水上計程車可以直接開到飯店水門。餐廳 19:00 前到才有位子。",
+    stay:"威尼斯運河旁飯店", transport:"AF1526・Alilaguna 水上巴士 / 私人水計", temp:"6°C ~ 10°C・濕冷" },
+
+  { seg:"ven", city:"威尼斯本島・Burano", short:"威尼斯本島", theme:"水都・只為妳們的迷宮",
+    route:["Piazza San Marco Venice", "Piazza San Marco", "Doge's Palace Venice"], rmode:"walking",
+    plan:[
+      {t:"08:00", title:"聖馬可廣場清晨", desc:"7:30 前到，廣場只有鴿子和你們，聖馬可教堂金色馬賽克發光", map:"Piazza San Marco"},
+      {t:"10:00", title:"道奇宮 & 嘆息橋", desc:"從嘆息橋看最後一眼自由，牽緊一點", map:"Palazzo Ducale Venezia"},
+      {t:"12:30", title:"貢多拉", desc:"30 分鐘，穿過最窄水巷，船夫會唱 O Sole Mio"},
+      {t:"16:00", title:"彩色島 Burano", desc:"快艇 40 分鐘，童話色房子，蕾絲店老奶奶", map:"Burano"},
+    ],
+    hl:[
+      {tag:"攝影", title:"清晨聖馬可", desc:"7:00-8:00 的光是蜜糖色，之後就是人海"},
+      {tag:"攻略", title:"貢多拉議價", desc:"固定價 90 歐 / 30 分，別信 60 歐的，繞的是臭水溝"},
+    ],
+    tips:"貢多拉選靠近飯店的站，船夫比較不趕。Burano 下午去，光好人少，記得買蕾絲當頭紗裝飾。",
+    stay:"威尼斯飯店・第二晚", transport:"全天步行 + Vaporetto 水巴", temp:"7°C・早晚霧氣重，超浪漫" },
+
+  { seg:"flo", city:"威尼斯 → 佛羅倫斯", short:"佛羅倫斯日落", theme:"百花・夕陽下的圓頂",
+    route:["Firenze Santa Maria Novella", "Mercato Centrale Firenze", "Cattedrale di Santa Maria del Fiore", "Piazzale Michelangelo", "Ponte Vecchio", "Piazza della Repubblica Florence"], rmode:"walking",
+    plan:[
+      {t:"09:00", title:"高鐵到佛羅倫斯", desc:"威尼斯 Santa Lucia 直達佛羅倫斯約 2 小時，大運河掰掰"},
+      {t:"11:30", title:"中央市場", desc:"中央市場牛肚包，站著吃，像當地人", map:"Mercato Centrale Firenze"},
+      {t:"14:00", title:"百花大教堂登頂", desc:"463 階，登上圓頂，托斯卡納紅屋頂全景", map:"Cupola del Brunelleschi"},
+      {t:"16:15", title:"米開朗基羅廣場日落", desc:"日落約 16:50，提早卡位，抱著熱紅酒看全城變粉色", map:"Piazzale Michelangelo"},
+      {t:"18:00", title:"老橋金飾店", desc:"走回老城，買一對小戒指當跨年禮物（明天一早就要搭車）", map:"Ponte Vecchio"},
+    ],
+    hl:[
+      {tag:"交通", title:"高鐵頭等艙", desc:"Italo 或 Frecciarossa 頭等艙都有迎賓飲料，座位寬，適合補眠"},
+      {tag:"浪漫", title:"米廣日落", desc:"12 月日落早，16:30 就要卡位，街頭藝人小提琴很催淚"},
+    ],
+    tips:"百花登頂要預約 15:00 前的，否則趕不上日落。米廣風超大，帶毛帽。這是佛羅倫斯唯一一晚，想逛的今天逛完。",
+    stay:"佛羅倫斯老城飯店", transport:"高鐵 威尼斯 → 佛羅倫斯・計程車", temp:"9°C・佛羅倫斯比威尼斯暖" },
+
+  { seg:"rom", city:"佛羅倫斯 → 羅馬・鬥獸場・跨年", short:"鬥獸場＋跨年", theme:"古城・許願池的吻",
+    route:["Roma Termini", "Trastevere Rome", "Colosseum", "Roman Forum", "Trevi Fountain"], rmode:"walking",
+    plan:[
+      {t:"08:30", title:"高鐵到羅馬", desc:"Frecciarossa 約 1.5 小時，10 點前到羅馬 Termini"},
+      {t:"11:00", title:"公寓寄放行李", desc:"Trastevere 石板小巷，先寄行李（入住時間跟房東確認）", map:"Trastevere Roma"},
+      {t:"12:30", title:"鬥獸場地下層 + 古羅馬廣場", desc:"導覽團進地下層，看角鬥士出場的升降梯遺跡，再到廢墟散步", map:"Colosseo"},
+      {t:"20:00", title:"跨年晚餐", desc:"Trastevere 小館，Cacio e Pepe ＋炸朝鮮薊"},
+      {t:"23:30", title:"特萊維噴泉跨年", desc:"人群倒數，丟硬幣，親吻，新年快樂", map:"Fontana di Trevi"},
+    ],
+    hl:[
+      {tag:"必訂", title:"鬥獸場地下", desc:"1/1 鬥獸場休館，所以排在今天；一定要訂含地下層的時段票"},
+      {tag:"跨年", title:"跨年位置", desc:"Circo Massimo 有大型免費演唱會人很多；特萊維小而擠，但氛圍最蜜月"},
+    ],
+    tips:"鬥獸場冬季開到 16:30、最後入場 15:30，地下層票開賣就搶。跨年夜地鐵延長到凌晨 2:30 左右，之後有夜間地鐵。噴泉前水池區收費 €2、只開放到 22:00，午夜只能待在廣場上，會非常擠。許願池硬幣要右手往左肩丟。",
+    stay:"Trastevere 蜜月公寓・三晚", transport:"Frecciarossa 佛羅倫斯 → 羅馬・步行", temp:"11°C・跨年夜 8°C 要大衣" },
+
+  { seg:"rom", city:"羅馬・新年慢日", short:"新年慢日", theme:"新年・聖彼得的鐘聲",
+    route:["Trastevere Rome", "Piazza San Pietro", "Ponte Sant'Angelo", "Piazza Navona"], rmode:"walking",
+    plan:[
+      {t:"10:00", title:"睡飽再出門", desc:"跨年後的早晨，公寓陽台喝咖啡；1/1 大眾運輸 8 點才開"},
+      {t:"12:00", title:"聖彼得廣場 新年三鐘經", desc:"教宗通常在中午從窗口帶念三鐘經、給新年祝福", map:"Piazza San Pietro"},
+      {t:"14:00", title:"新年午餐", desc:"Borgo 小巷，羅馬式烤羊排（一定要先訂）"},
+      {t:"16:00", title:"聖天使橋黃昏 → 納沃納廣場", desc:"台伯河上看聖天使城堡剪影，再去納沃納廣場聖誕市集", map:"Ponte Sant'Angelo"},
+    ],
+    hl:[
+      {tag:"秘訣", title:"新年的羅馬", desc:"博物館和鬥獸場都休館，正好用來散步、補眠"},
+      {tag:"儀式", title:"新年祝福", desc:"在聖彼得廣場一起迎接新年第一個正午"},
+    ],
+    tips:"梵蒂岡博物館和鬥獸場 1/1 都休館。很多餐廳也關門，午餐、晚餐都要先訂好。廣場進場要過安檢，提早 30 分鐘到。",
+    stay:"Trastevere 公寓・第二晚", transport:"步行", temp:"10°C" },
+
+  { seg:"rom", city:"羅馬・梵蒂岡", short:"梵蒂岡", theme:"梵蒂岡・最後的盛宴",
+    route:["Vatican Museums", "St. Peter's Basilica", "Trattoria Da Enzo al 29 Rome"], rmode:"walking",
+    plan:[
+      {t:"早場", title:"梵蒂岡早場導覽", desc:"比一般遊客早進場，人少的時候看西斯汀天頂畫，最後直接走進聖彼得大教堂", map:"Musei Vaticani"},
+      {t:"11:30", title:"聖彼得大教堂登頂", desc:"551 階，看羅馬全景，新年許願最靈", map:"Basilica di San Pietro"},
+      {t:"14:00", title:"午餐 Trapizzino", desc:"羅馬街頭小吃，三角口袋披薩"},
+      {t:"18:30", title:"Trastevere 美食夜", desc:"Da Enzo 排隊，Carbonara ＋提拉米蘇，蜜月最後晚餐", map:"Da Enzo al 29"},
+    ],
+    hl:[
+      {tag:"必訂", title:"早場導覽", desc:"1/2 是週六人多，早場導覽能避開最擠的時段"},
+      {tag:"告別", title:"Trastevere 夜色", desc:"最後一夜，巷子裡的酒吧都認識妳們了"},
+    ],
+    tips:"梵蒂岡要遮膝蓋和肩膀，帶條圍巾。Da Enzo 17:30 去排，否則要等 1 小時。明天早上 7 點就要出門去機場，今晚先打包。",
+    stay:"Trastevere 公寓・最後一夜", transport:"地鐵 A 線・步行", temp:"12°C" },
+
+  { seg:"rom", city:"羅馬 → 台北", short:"回家", theme:"帶著光回家",
+    route:["Trastevere Rome", "Rome Fiumicino Airport"], rmode:"driving",
+    plan:[
+      {t:"07:00", title:"出發去 FCO", desc:"Leonardo Express，退稅要提早 3 小時到，買最後的檸檬酒"},
+      {t:"約 10:30", title:"起飛", desc:"華航羅馬直飛台北（每週三、日各一班），約 12.5 小時，機上整理 16 天照片"},
+      {t:"1/4 清晨", title:"抵達桃園", desc:"帶著北極光、城堡煙火、許願池硬幣回家"},
+    ],
+    hl:[
+      {tag:"總結", title:"16 天總結", desc:"從 -25°C 到 12°C，從極夜到永恆之城，妳們一起跨過一年"},
+      {tag:"儀式", title:"回憶封存", desc:"機上寫明信片，寄給一年後的自己"},
+    ],
+    tips:"義大利退稅要提早 3 小時，Global Blue 在 T3。機上記得穿壓力襪。",
+    stay:"機上", transport:"Leonardo Express + 華航直飛（待訂，班表以訂票時為準）", temp:"台北 19°C・回家了" },
+];
+
+/* 預訂清單：status "待訂"|"已訂"；opens = 幾天前開放預訂（不填代表現在就能訂）；where = 去哪訂；gyg = GetYourGuide 連結 {url, price, rating} */
+const BOOKINGS = [
+  {item:"去程機票 台北 → 赫爾辛基 → 羅瓦涅米", day:"D1", status:"待訂", where:"芬蘭航空官網或旅行社，一張票訂到底", note:"沒有直飛，12/18 深夜出發，經香港/東京轉機"},
+  {item:"羅瓦涅米市區飯店（2 晚）", day:"D1", status:"待訂", where:"飯店官網或訂房網站"},
+  {item:"聖誕老人村 + 馴鹿、哈士奇雪橇（6 小時）", day:"D2", status:"待訂", where:"GetYourGuide", gyg:{url:"https://www.getyourguide.com/rovaniemi-l2653/rovaniemi-reindeer-huskies-and-santa-claus-experience-t301148/", price:"US$211 起／人", rating:"4.6（2,417 則）"}, note:"含飯店接送、午餐、保暖衣"},
+  {item:"雪地摩托 Arctic Safari（3 小時）", day:"D3", status:"待訂", where:"GetYourGuide", gyg:{url:"https://www.getyourguide.com/rovaniemi-l2653/rovaniemi-safari-mobil-salju-barbeque-di-hutan-belantara-berpemandu-t699161/", price:"US$133 起／人", rating:"4.7（2,288 則）"}, note:"不含飯店接送，在市中心 Arctic GM 辦公室集合；2 人共騎一台"},
+  {item:"森林玻璃屋（2 晚）", day:"D3", status:"待訂", where:"飯店官網或訂房網站", note:"冬季熱門，越早越好"},
+  {item:"Ranua 動物園半日團（5 小時）", day:"D4", status:"待訂", where:"GetYourGuide", gyg:{url:"https://www.getyourguide.com/rovaniemi-l2653/rovaniemi-ranua-zoo-wildlife-park-tour-with-hotel-pickup-t840912/", price:"US$129 起／人", rating:"4.6（7 則，評價數少）"}, note:"含飯店接送、門票、英文導遊"},
+  {item:"極光雪鞋健行（3 小時）", day:"D4", status:"待訂", where:"GetYourGuide", gyg:{url:"https://www.getyourguide.com/rovaniemi-l2653/night-snowshoeing-adventure-under-the-northern-lights-t510725/", price:"US$118 起／人", rating:"4.5（53 則）"}, note:"含接送、雪鞋和保暖衣；住離市中心 10 km 以上要加接送費，訂的時候確認 玻璃屋 算不算"},
+  {item:"羅瓦涅米 → 巴黎機票", day:"D5", status:"待訂", where:"芬蘭航空官網", note:"和去程一起訂可能更便宜"},
+  {item:"迪士尼園區飯店（3 晚）+ 樂園門票", day:"D5", status:"待訂", where:"迪士尼官網，訂房加門票套裝", note:"聖誕週最貴也最搶"},
+  {item:"平安夜 Royal Banquet 晚餐", day:"D6", status:"待訂", where:"迪士尼 App 或官網", opens:60, note:"現場幾乎全滿"},
+  {item:"瑪黑公寓（12/26–27，2 晚）", day:"D8", status:"待訂", where:"訂房網站", note:"確認入住時間可以晚到"},
+  {item:"羅浮宮時段票", day:"D9", status:"待訂", where:"ticket.louvre.fr", opens:120, note:"非歐盟 €32；週二休館"},
+  {item:"Le Jules Verne 晚餐", day:"D9", status:"待訂", where:"Jules Verne 官網", opens:90, note:"品嚐菜單約 €295 起；男士要穿西裝外套"},
+  {item:"塞納河遊船（1 小時）", day:"D9", status:"待訂", where:"GetYourGuide", gyg:{url:"https://www.getyourguide.com/paris-l16/paris-sightseeing-river-cruise-t15928/", price:"US$20 起／人", rating:"4.3（2,944 則）"}, note:"鐵塔旁 Port de Suffren 上船，平均 45 分鐘一班"},
+  {item:"巴黎 → 威尼斯機票", day:"D10", status:"待訂", where:"法航或其他航空官網"},
+  {item:"威尼斯飯店（2 晚）+ 機場水上計程車", day:"D10", status:"待訂", where:"飯店官網；水上計程車可請飯店代訂", note:"先問清楚水上計程車價錢"},
+  {item:"聖馬可大教堂 + 道奇宮 + 嘆息橋", day:"D11", status:"待訂", where:"GetYourGuide", gyg:{url:"https://www.getyourguide.com/venice-l35/venice-st-mark-s-basilica-doge-s-palace-bridge-of-sighs-t927092/", price:"US$47 起／人", rating:"4.1（5,161 則）"}, note:"可選語音導覽或真人導覽；聖馬可 9:30 才開門"},
+  {item:"貢多拉（可選）", day:"D11", status:"待訂", where:"GetYourGuide 或現場", gyg:{url:"https://www.getyourguide.com/venice-l35/gondola-tours-tc264/", price:"看方案", rating:""}, note:"共享船比較便宜；現場包船白天 30 分鐘 €90"},
+  {item:"高鐵 威尼斯 → 佛羅倫斯", day:"D12", status:"待訂", where:"trenitalia.com 或 italotreno.com", opens:120, note:"越早越便宜"},
+  {item:"百花大教堂圓頂登頂", day:"D12", status:"待訂", where:"GetYourGuide 或官網", gyg:{url:"https://www.getyourguide.com/florence-l32/brunelleschi-s-dome-florence-duomo-cathedral-entry-ticket-t867225/", price:"US$80 起／人", rating:"4.5（100 則）"}, note:"GetYourGuide 含圓頂時段＋3 日通行證；官網 €30 只含圓頂。選 15:00 前的時段"},
+  {item:"佛羅倫斯飯店（1 晚）", day:"D12", status:"待訂", where:"飯店官網或訂房網站"},
+  {item:"高鐵 佛羅倫斯 → 羅馬（08:30 左右）", day:"D13", status:"待訂", where:"trenitalia.com 或 italotreno.com", opens:120},
+  {item:"Trastevere 公寓（3 晚）", day:"D13", status:"待訂", where:"訂房網站", note:"問房東能不能 11 點先寄放行李"},
+  {item:"鬥獸場地下層門票（12/31 中午）", day:"D13", status:"待訂", where:"官網優先，搶不到再用 GetYourGuide", gyg:{url:"https://www.getyourguide.com/colosseum-underground-l90536/", price:"看方案", rating:""}, note:"官網 €24 最便宜；記名制，入場要帶證件"},
+  {item:"跨年夜晚餐 20:00", day:"D13", status:"待訂", where:"餐廳官網或 TheFork"},
+  {item:"1/1 新年午餐", day:"D14", status:"待訂", where:"餐廳官網或 TheFork", note:"很多餐廳 1/1 關門"},
+  {item:"梵蒂岡早場導覽（博物館＋西斯汀＋聖彼得）", day:"D15", status:"待訂", where:"GetYourGuide", gyg:{url:"https://www.getyourguide.com/rome-l33/vatican-early-entry-to-museums-sistine-chapel-st-peter-s-t50951/", price:"US$122 起／人", rating:"4.9（3,578 則）"}, note:"3–3.5 小時，從西斯汀直接走進聖彼得大教堂；只買門票可上官網約 €25"},
+  {item:"聖彼得大教堂圓頂", day:"D15", status:"待訂", where:"官網或 GetYourGuide", gyg:{url:"https://www.getyourguide.com/rome-l33/rome-st-peter-s-basilica-w-climb-to-the-dome-crypt-t78613/", price:"US$53 起／人", rating:"4.6（1,605 則）"}, note:"官網約 €22（含電梯）；GetYourGuide 版本含導遊"},
+  {item:"回程機票 羅馬 → 台北", day:"D16", status:"待訂", where:"華航官網", note:"直飛只有週三、週日，1/3 剛好是週日"},
+];
+
+/* 交通：每一段怎麼移動。mode 是交通方式，tip 是要注意的地方 */
+const LEGS = [
+  {day:"D1", from:"台北", to:"羅瓦涅米", mode:"飛機", how:"經香港或東京轉芬蘭航空到赫爾辛基，再轉國內線到羅瓦涅米。一張票訂到底，行李直掛。", tip:"赫爾辛基是第一個申根入境點，要做指紋和拍照的入境登記（EES），轉機時間至少留 2 小時。"},
+  {day:"D1", from:"羅瓦涅米機場", to:"市區飯店（市中心）", mode:"機場巴士 / 計程車", how:"機場巴士配合航班發車，上車刷卡付約 €8；計程車約 €25–35，約 15 分鐘。", tip:"不用預約。"},
+  {day:"D2", from:"市區飯店", to:"聖誕老人村、馴鹿、哈士奇", mode:"行程接送", how:"GetYourGuide 行程含飯店來回接送。", tip:"12 月接送時間約 9–11 點，前一天會通知。"},
+  {day:"D3", from:"市區飯店", to:"雪地摩托", mode:"步行 + 業者巴士", how:"走到市中心的 Arctic GM 辦公室集合，再搭業者巴士到雪地摩托基地。", tip:"早上出發前先退房，把行李寄放在櫃台。"},
+  {day:"D3", from:"市區飯店", to:"森林玻璃屋", mode:"計程車", how:"傍晚回飯店拿行李，搭計程車約 15 分鐘過去。也可以問 玻璃屋 能不能安排接送。", tip:"玻璃屋 的房間分散在森林裡，櫃台有接駁車送到房間。"},
+  {day:"D4", from:"玻璃屋", to:"Ranua 動物園", mode:"旅行團", how:"參加含交通的半日團，單程約 1 小時。", tip:"冬季雪地路況差，不建議自駕。"},
+  {day:"D4", from:"玻璃屋", to:"極光健行", mode:"業者接送", how:"嚮導開車接送到沒有光害的地方。", tip:"雲層厚時會開很遠，要有心理準備。"},
+  {day:"D5", from:"玻璃屋", to:"羅瓦涅米機場", mode:"計程車", how:"請櫃台叫車，約 10 分鐘。", tip:""},
+  {day:"D5", from:"羅瓦涅米", to:"巴黎 CDG", mode:"飛機", how:"芬蘭航空經赫爾辛基轉機，行李直掛。", tip:"申根境內航班，不用再過海關。"},
+  {day:"D5", from:"CDG 機場", to:"迪士尼園區飯店", mode:"計程車 / TGV", how:"計程車跳表約 €70–100，約 40 分鐘；或在 2 航廈搭 TGV 10 分鐘到 Marne-la-Vallée，下車走到飯店。", tip:"巴黎市區的計程車固定價不適用迪士尼。Magical Shuttle 巴士便宜，但塞車可能要 1.5 小時。"},
+  {day:"D6", from:"迪士尼園區飯店", to:"樂園", mode:"步行", how:"飯店有專屬入口直通 Disneyland Park。", tip:""},
+  {day:"D8", from:"迪士尼園區飯店", to:"La Vallée Village", mode:"計程車", how:"約 10 分鐘。到了把行李寄放在接駁車下車區（1–4 件一天 €10）。", tip:"也可以搭 RER A 一站到 Val d'Europe，再走 10 分鐘，但帶行李不方便。"},
+  {day:"D8", from:"La Vallée Village", to:"瑪黑公寓", mode:"計程車 / Uber", how:"約 45–60 分鐘，約 €60–90。", tip:"買了很多東西就別搭 RER 了。"},
+  {day:"D9", from:"瑪黑", to:"羅浮宮、鐵塔、遊船碼頭", mode:"地鐵", how:"單程票 €2.55。用 Île-de-France Mobilités App 買手機票，或買一張 Navigo Easy 卡（€2）加值。", tip:"兩個人一天大概搭 4–6 趟，單程票就夠。"},
+  {day:"D10", from:"瑪黑", to:"CDG 機場", mode:"計程車", how:"右岸到 CDG 固定價 €56，約 45 分鐘。", tip:"機場線 RER B 單程 €14，帶行李不建議。"},
+  {day:"D10", from:"巴黎 CDG", to:"威尼斯 VCE", mode:"飛機", how:"直飛約 1.5 小時。", tip:"申根境內航班。"},
+  {day:"D10", from:"威尼斯機場", to:"威尼斯飯店", mode:"水上計程車 / Alilaguna", how:"水上計程車直接開到飯店水門，可請飯店代訂。省錢可搭 Alilaguna 橘線到 離飯店最近的站，€8–15，每件行李加 €3，約 1 小時一班。", tip:"水上計程車的價錢上船前講好。"},
+  {day:"D11", from:"飯店", to:"聖馬可、Burano", mode:"水上巴士", how:"買 24 小時票 €25（單程 €9.50）。Burano 從 Fondamente Nove 搭 12 號線約 40 分鐘。", tip:"在 ACTV App（hellovenice）買票，上船前要先感應。"},
+  {day:"D11", from:"運河", to:"貢多拉", mode:"貢多拉", how:"白天 30 分鐘 €90，19:00 後 €110，現場搭。", tip:"上船前確認價錢和時間。"},
+  {day:"D12", from:"飯店", to:"威尼斯火車站", mode:"水上巴士 / 水上計程車", how:"水上巴士 2 號線約 25 分鐘；行李多可請飯店叫水上計程車。", tip:"水上巴士帶大行李在尖峰時段很擠。"},
+  {day:"D12", from:"威尼斯", to:"佛羅倫斯", mode:"高鐵", how:"約 2 小時。在 trenitalia.com 或 italotreno.com 訂，電子票存手機。", tip:"開賣約 3–4 個月前，越早越便宜。"},
+  {day:"D12", from:"佛羅倫斯車站", to:"佛羅倫斯飯店", mode:"步行 / 計程車", how:"步行約 10 分鐘，帶行李搭計程車約 5 分鐘。", tip:""},
+  {day:"D13", from:"佛羅倫斯", to:"羅馬 Termini", mode:"高鐵", how:"約 1.5 小時，訂 08:30 左右的車。", tip:""},
+  {day:"D13", from:"Termini 車站", to:"Trastevere 公寓", mode:"計程車", how:"約 20 分鐘，先寄放行李再去鬥獸場。", tip:"羅馬叫車可用 FREENOW 或 itTaxi App。"},
+  {day:"D13", from:"Trastevere", to:"特萊維噴泉（跨年）", mode:"步行", how:"約 30 分鐘。跨年夜地鐵延長到凌晨 2:30 左右，之後還有夜間地鐵。", tip:"跨年夜計程車很難叫。"},
+  {day:"D15", from:"Trastevere", to:"梵蒂岡", mode:"步行 / 計程車", how:"步行約 30 分鐘；趕早場導覽建議搭計程車，要提早 15 分鐘到集合點。", tip:"羅馬地鐵可以直接感應信用卡進站。"},
+  {day:"D16", from:"Trastevere", to:"FCO 機場", mode:"計程車", how:"城牆內到機場固定價 €55（含 Trastevere），早上 7 點出發。", tip:"Leonardo Express 從 Termini 出發 €14/人，但要先到 Termini。"},
+  {day:"D16", from:"羅馬", to:"台北", mode:"飛機", how:"華航直飛約 12.5 小時。", tip:"退稅要提早 3 小時到機場。"},
+];
+
+/* 出發前準備 */
+const PREP = [
+  {t:"護照", d:"台灣護照免簽入境申根 90 天；護照效期要在離開申根那天之後還剩 3 個月以上。"},
+  {t:"入境登記 EES", d:"第一次入境申根（赫爾辛基）要按指紋、拍照，第一次會比較久，轉機時間要留寬。"},
+  {t:"ETIAS", d:"歐盟預計 2026 年第四季上線，上線初期有過渡期、不會擋人。出發前一個月上歐盟官網確認，已開放的話就先線上申請（€20）。"},
+  {t:"付款", d:"芬蘭、法國、義大利幾乎都能感應刷卡。帶兩張不同發卡組織的卡，加少量歐元現金給貢多拉、小費和小店。"},
+  {t:"手機 App", d:"Finnair、Disneyland Paris（快速通關、餐廳、節目時間）、Île-de-France Mobilités（巴黎地鐵）、ACTV hellovenice（威尼斯水上巴士）、Trenitalia / Italo、Uber 和 FREENOW（巴黎、羅馬叫車）、Google 離線地圖。"},
+  {t:"網路", d:"買一張涵蓋芬蘭、法國、義大利的歐洲 eSIM。"},
+  {t:"保暖", d:"活動業者通常會借連身保暖衣、靴子和手套；自己帶發熱衣、毛帽、面罩、暖暖包。"},
+  {t:"服裝", d:"Jules Verne 男士要穿西裝外套；梵蒂岡、聖馬可大教堂要遮肩膀和膝蓋。"},
+  {t:"保險", d:"旅平險加買班機延誤、行李遺失；冬季北歐航班偶爾會因雪延誤。"},
+  {t:"退稅", d:"法國和義大利同一家店消費滿約 €100 可退稅，結帳時出示護照正本。全部的退稅單在最後離開歐盟時（羅馬機場）一起辦，退稅商品帶在身上，提早 3 小時到機場。"},
+];
+
+/* 需要導遊或跟團的地方 */
+const GUIDES = [
+  {t:"羅瓦涅米所有活動", need:"跟團", d:"馴鹿、哈士奇、雪地摩托、Ranua、極光健行都是業者帶隊，全部可以在 GetYourGuide 訂，連結在預訂清單。"},
+  {t:"鬥獸場地下層", need:"已含帶領", d:"官方票由工作人員帶進地下層（約 45 分鐘），不算導覽；想聽完整講解可另訂導覽團。"},
+  {t:"梵蒂岡博物館", need:"已安排導覽", d:"用 GetYourGuide 的早場導覽，比一般開門早進場，還能從西斯汀直接走進聖彼得大教堂。"},
+  {t:"道奇宮", need:"可選", d:"可以自己逛；「秘密路線」導覽要另外預約。"},
+  {t:"迪士尼、羅浮宮、百花圓頂、聖彼得", need:"不用", d:"自己去就好，重點是先訂好時段票。"},
+];
+/* ======================= 資料到此為止 ======================= */
+
+const COORDS = {"Rovaniemi Airport": [66.558, 25.8275], "Rovaniemi city centre": [66.503, 25.729], "Santa Claus Village Rovaniemi": [66.5435, 25.8476], "Ranua Zoo": [65.9434, 26.467], "Paris Charles de Gaulle Airport": [49.0079, 2.5508], "Disneyland Park Paris": [48.8711, 2.7788], "Disney Adventure World Paris": [48.8681, 2.7804], "La Vallée Village": [48.8546, 2.7838], "Le Marais Paris": [48.8612, 2.3582], "Louvre Museum": [48.8606, 2.3376], "Merci 111 Boulevard Beaumarchais Paris": [48.8607, 2.3668], "Bateaux Parisiens Port de la Bourdonnais": [48.8574, 2.2905], "Le Jules Verne Paris": [48.8584, 2.2945], "Venice Marco Polo Airport": [45.5047, 12.3466], "Piazza San Marco Venice": [45.4342, 12.3385], "Piazza San Marco": [45.4342, 12.3385], "Doge's Palace Venice": [45.4337, 12.3404], "Burano": [45.4854, 12.4167], "Firenze Santa Maria Novella": [43.7767, 11.2479], "Mercato Centrale Firenze": [43.7765, 11.2528], "Cattedrale di Santa Maria del Fiore": [43.7731, 11.256], "Piazzale Michelangelo": [43.7629, 11.2651], "Ponte Vecchio": [43.7679, 11.2531], "Piazza della Repubblica Florence": [43.7715, 11.254], "Roma Termini": [41.9013, 12.5016], "Trastevere Rome": [41.8848, 12.4704], "Colosseum": [41.8902, 12.4922], "Roman Forum": [41.8921, 12.4864], "Trevi Fountain": [41.9009, 12.4833], "Piazza San Pietro": [41.9022, 12.4567], "Ponte Sant'Angelo": [41.9017, 12.4665], "Piazza Navona": [41.8992, 12.4731], "Vatican Museums": [41.9065, 12.4536], "St. Peter's Basilica": [41.9022, 12.4539], "Trattoria Da Enzo al 29 Rome": [41.8881, 12.4779], "Rome Fiumicino Airport": [41.8035, 12.2519]};
+const PLABEL = {"Rovaniemi city centre": "羅瓦涅米市區", "Santa Claus Village Rovaniemi": "聖誕老人村", "Rovaniemi Airport": "羅瓦涅米機場", "Ranua Zoo": "Ranua 動物園", "Paris Charles de Gaulle Airport": "CDG 機場", "Disneyland Park Paris": "迪士尼樂園", "Disney Adventure World Paris": "Adventure World", "La Vallée Village": "La Vallée Village", "Le Marais Paris": "瑪黑區", "Louvre Museum": "羅浮宮", "Merci 111 Boulevard Beaumarchais Paris": "Merci", "Bateaux Parisiens Port de la Bourdonnais": "遊船碼頭", "Le Jules Verne Paris": "Jules Verne（鐵塔）", "Venice Marco Polo Airport": "威尼斯機場", "Piazza San Marco Venice": "聖馬可區", "Piazza San Marco": "聖馬可廣場", "Doge's Palace Venice": "道奇宮", "Burano": "Burano", "Firenze Santa Maria Novella": "佛羅倫斯車站", "Mercato Centrale Firenze": "中央市場", "Cattedrale di Santa Maria del Fiore": "百花大教堂", "Piazzale Michelangelo": "米開朗基羅廣場", "Ponte Vecchio": "老橋", "Piazza della Repubblica Florence": "共和廣場", "Roma Termini": "Termini 車站", "Trastevere Rome": "Trastevere", "Colosseum": "鬥獸場", "Roman Forum": "古羅馬廣場", "Trevi Fountain": "特萊維噴泉", "Piazza San Pietro": "聖彼得廣場", "Ponte Sant'Angelo": "聖天使橋", "Piazza Navona": "納沃納廣場", "Vatican Museums": "梵蒂岡博物館", "St. Peter's Basilica": "聖彼得大教堂", "Trattoria Da Enzo al 29 Rome": "Da Enzo", "Rome Fiumicino Airport": "羅馬機場"};
+
+let _maps = [];
+function drawMaps(){
+  _maps.forEach(m => m.remove()); _maps = [];
+  if (!window.L) return;
+  const css = getComputedStyle(document.documentElement);
+  const mk = (el, pts, color, labelled) => {
+    const m = L.map(el, {scrollWheelZoom:false, attributionControl:true});
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom:18, attribution:'&copy; OpenStreetMap'}).addTo(m);
+    const ll = pts.map(p => p.ll);
+    if (ll.length > 1) L.polyline(ll, {color, weight:3, opacity:.8, dashArray:'6 6'}).addTo(m);
+    pts.forEach((p, i) => {
+      const icon = L.divIcon({className:'pin', html:`<span style="background:${color}">${labelled ? i + 1 : ''}</span>`, iconSize:[24,24], iconAnchor:[12,12]});
+      L.marker(p.ll, {icon}).addTo(m).bindTooltip(p.name, {direction:'top', offset:[0,-10]});
+    });
+    if (ll.length === 1) m.setView(ll[0], 14); else m.fitBounds(ll, {padding:[28,28]});
+    _maps.push(m);
+  };
+  const dm = document.getElementById('daymap');
+  if (dm) {
+    const d = DAYS[state.day];
+    const seen = new Set(); const pts = [];
+    (d.route || []).forEach(n => { if (!seen.has(n) && COORDS[n]) { seen.add(n); pts.push({ll:COORDS[n], name:PLABEL[n] || n}); } });
+    if (pts.length) mk(dm, pts, css.getPropertyValue(d.c.slice(4, -1)).trim() || '#333', true); else dm.hidden = true;
+  }
+  const om = document.getElementById('ovmap');
+  if (om) {
+    const pts = groups.map(g => ({ll:[SEGMENTS[g.seg].lat, SEGMENTS[g.seg].lon], name:SEGMENTS[g.seg].name}));
+    mk(om, pts, css.getPropertyValue('--ink').trim(), true);
+  }
+}
+const COLORS = {lap:"var(--lap)",par:"var(--par)",ven:"var(--ven)",flo:"var(--flo)",rom:"var(--rom)"};
+const WK = "日一二三四五六";
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const [sy, sm, sd] = TRIP.START.split("-").map(Number);
+DAYS.forEach((d, i) => {
+  const dt = new Date(sy, sm - 1, sd + i);
+  d.id = "D" + (i + 1); d.i = i;
+  d.date = `${dt.getMonth() + 1}/${dt.getDate()}`;
+  d.wk = WK[dt.getDay()];
+  d.c = COLORS[d.seg];
+});
+const lastDay = DAYS[DAYS.length - 1];
+const routeUrl = d => {
+  if (!d.route || d.route.length < 2) return "";
+  const r = d.route, e = encodeURIComponent;
+  let u = "https://www.google.com/maps/dir/?api=1&origin=" + e(r[0]) + "&destination=" + e(r[r.length - 1]) + "&travelmode=" + (d.rmode || "walking");
+  if (r.length > 2) u += "&waypoints=" + r.slice(1, -1).map(e).join("%7C");
+  return u;
+};
+const mapUrl = q => "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(q);
+
+// grouped segments, in order of appearance
+const groups = [];
+DAYS.forEach(d => { const g = groups[groups.length - 1]; if (g && g.seg === d.seg) g.days.push(d); else groups.push({seg:d.seg, days:[d]}); });
+
+const store = { get(k){ try { return localStorage.getItem(k); } catch(e){ return null; } }, set(k,v){ try { localStorage.setItem(k,v); } catch(e){} } };
+let state = { tab: "day", day: 0 };
+const h = location.hash.replace("#", "").toLowerCase();
+if (/^d\d+$/.test(h) && +h.slice(1) <= DAYS.length) state.day = +h.slice(1) - 1;
+else if (["day","ov","tr","bk"].includes(h)) state.tab = h;
+else { const sd2 = +store.get("hm-day"); if (sd2 >= 0 && sd2 < DAYS.length) state.day = sd2; const st = store.get("hm-tab"); if (["day","ov","tr","bk"].includes(st)) state.tab = st; }
+
+// header
+document.getElementById("tripTitle").textContent = TRIP.title;
+document.getElementById("tripSub").textContent = `${DAYS[0].date}（${DAYS[0].wk}）– ${lastDay.date}（${lastDay.wk}）· ${DAYS.length} 天 · ${TRIP.route}`;
+(function countdown(){
+  const now = new Date(); const t0 = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const start = new Date(sy, sm - 1, sd);
+  const diff = Math.round((start - t0) / 864e5);
+  let html;
+  if (diff > 0) html = `距離出發<b>${diff} 天</b>`;
+  else if (-diff < DAYS.length) html = `蜜月進行中<b>第 ${1 - diff} 天</b>`;
+  else html = `蜜月<b>已完成</b>`;
+  document.getElementById("countdown").innerHTML = html;
+})();
+document.getElementById("segbar").innerHTML = groups.map(g => `<span style="--c:${COLORS[g.seg]};flex:${g.days.length}" title="${esc(SEGMENTS[g.seg].name)}"></span>`).join("");
+document.getElementById("seglegend").innerHTML = groups.map(g => `<span style="--c:${COLORS[g.seg]}"><i></i>${esc(SEGMENTS[g.seg].name)} ${g.days[0].date}–${g.days[g.days.length-1].date}</span>`).join("");
+const pending = BOOKINGS.filter(b => b.status !== "已訂").length;
+document.getElementById("bkCount").textContent = pending ? pending : "✓";
+
+const dayById = id => DAYS.find(d => d.id === id);
+const TODAY = (() => { const n = new Date(); return new Date(n.getFullYear(), n.getMonth(), n.getDate()); })();
+const dayDate = d => new Date(sy, sm - 1, sd + d.i);
+function opensInfo(b){
+  const d = dayById(b.day);
+  if (!b.opens || !d) return {open:true, at:0, label:""};
+  const o = new Date(dayDate(d)); o.setDate(o.getDate() - b.opens);
+  const open = o <= TODAY;
+  return {open, at:o.getTime(), label: open ? "已開放預訂" : `${o.getMonth() + 1}/${o.getDate()} 開放預訂`};
+}
+function todoRow(b, showDay){
+  const d = dayById(b.day); const done = b.status === "已訂"; const oi = opensInfo(b);
+  const dayBtn = showDay && d ? `<button class="on" data-go="${d.i}" style="--c:${d.c};color:${d.c}">${d.id} · ${d.date}</button>` : "";
+  const st = done ? `<span class="st done-s">已訂</span>` : oi.open ? `<span class="st todo-s">待訂</span>` : `<span class="st wait-s">未開放</span>`;
+  const meta = [b.where ? `去哪訂：${esc(b.where)}` : "", !done && oi.label ? `<b class="${oi.open ? "" : "soon"}">${oi.label}</b>` : "", b.note ? esc(b.note) : ""].filter(Boolean).join("　");
+  const gyg = b.gyg ? `<a class="gyg" href="${esc(b.gyg.url)}" target="_blank" rel="noopener">在 GetYourGuide 購買<span>${esc(b.gyg.price)}${b.gyg.rating ? "・★ " + esc(b.gyg.rating) : ""}</span></a>` : "";
+  return `<div class="todo">${st}<div>${esc(b.item)}${meta ? `<small>${meta}</small>` : ""}${gyg}</div>${dayBtn}</div>`;
+}
+function legRow(l, showDay){
+  const d = dayById(l.day);
+  const dayBtn = showDay && d ? `<button class="on" data-go="${d.i}" style="color:${d.c}">${d.id} · ${d.date}</button>` : "";
+  return `<div class="leg" style="--c:${d ? d.c : "var(--ink)"}"><div class="leg-top"><span class="mode">${esc(l.mode)}</span><span class="route">${esc(l.from)} → ${esc(l.to)}</span>${dayBtn}</div><div class="how">${esc(l.how)}</div>${l.tip ? `<div class="ltip">${esc(l.tip)}</div>` : ""}</div>`;
+}
+
+function renderStrip(){
+  const el = document.getElementById("strip");
+  el.hidden = state.tab !== "day";
+  el.innerHTML = DAYS.map(d => `<button class="chip" data-go="${d.i}" style="--c:${d.c}" aria-current="${d.i === state.day}"><div class="d">${d.id}</div><div class="dt">${d.date}</div><div class="wk">${d.wk}・${esc(d.short)}</div></button>`).join("");
+  const cur = el.querySelector('[aria-current="true"]');
+  if (cur && !el.hidden) { const r = cur.offsetLeft - el.clientWidth / 2 + cur.clientWidth / 2; el.scrollTo({left: r, behavior: "smooth"}); }
+}
+
+function renderDay(){
+  const d = DAYS[state.day]; const prev = DAYS[state.day - 1]; const next = DAYS[state.day + 1];
+  const todos = BOOKINGS.filter(b => b.day === d.id);
+  const side = groups.map(g => `<div class="sgroup" style="--c:${COLORS[g.seg]}"><h3>${esc(SEGMENTS[g.seg].name)}<small>${g.days.length} 天</small></h3>${
+    g.days.map(x => `<button class="srow" data-go="${x.i}" aria-current="${x.i === state.day}" style="--c:${x.c}"><span class="dt">${x.date}<small>${x.id} · ${x.wk}</small></span><span class="nm">${esc(x.short)}</span></button>`).join("")}</div>`).join("");
+  return `<div class="layout"><aside class="side">${side}</aside>
+  <article class="day" style="--c:${d.c}">
+    <div class="day-head"><div class="dlabel">${d.id} / ${DAYS.length}<span>${d.date}（${d.wk}）· ${esc(SEGMENTS[d.seg].name)}</span></div>
+      <div class="nav"><button data-go="${state.day - 1}" ${prev ? "" : "disabled"} aria-label="前一天">← 前一天</button><button data-go="${state.day + 1}" ${next ? "" : "disabled"} aria-label="後一天">後一天 →</button></div></div>
+    <h2>${esc(d.city)}</h2>
+    <div class="theme">${esc(d.theme)}</div>
+    <div id="daymap" class="daymap"></div>
+    ${routeUrl(d) ? `<a class="routebtn" href="${routeUrl(d)}" target="_blank" rel="noopener">在 Google 地圖看今天路線<span>${d.route.length} 個地點</span></a>` : ""}
+    <dl class="facts"><div><dt>住宿</dt><dd>${esc(d.stay)}</dd></div><div><dt>交通</dt><dd>${esc(d.transport)}</dd></div><div><dt>氣溫</dt><dd>${esc(d.temp)}</dd></div></dl>
+    <div class="sec-t">今日行程</div>
+    <ol class="plan">${d.plan.map(p => `<li><div class="tm">${esc(p.t)}</div><div><div class="pt">${esc(p.title)}</div><div class="pd">${esc(p.desc)}</div>${p.map ? `<a class="maplink" href="${mapUrl(p.map)}" target="_blank" rel="noopener">在 Google 地圖開啟</a>` : ""}</div></li>`).join("")}</ol>
+    ${d.hl?.length ? `<div class="sec-t">亮點</div><div class="hl">${d.hl.map(x => `<div><span class="tag">${esc(x.tag)}</span><b>${esc(x.title)}</b><p>${esc(x.desc)}</p></div>`).join("")}</div>` : ""}
+    ${d.tips ? `<div class="sec-t">提醒</div><div class="tips">${esc(d.tips)}</div>` : ""}
+    ${(() => { const ls = LEGS.filter(l => l.day === d.id); return ls.length ? `<div class="sec-t">這天的交通</div><div class="legs">${ls.map(l => legRow(l, false)).join("")}</div>` : ""; })()}
+    ${todos.length ? `<div class="sec-t">這天要先訂</div><div class="daytodo">${todos.map(b => todoRow(b, false)).join("")}</div>` : ""}
+    <div class="foot-nav">${prev ? `<button data-go="${prev.i}"><small>← ${prev.id} · ${prev.date}</small>${esc(prev.short)}</button>` : ""}${next ? `<button data-go="${next.i}"><small>${next.id} · ${next.date} →</small>${esc(next.short)}</button>` : ""}</div>
+  </article></div>`;
+}
+
+function routeSvg(){
+  const pts = groups.map(g => SEGMENTS[g.seg]);
+  const k = 13, cx = Math.cos(55 * Math.PI / 180);
+  const lon0 = 0, lat0 = 68.5, W = 230, H = Math.round((lat0 - 40) * k);
+  const P = s => [ 30 + (s.lon - lon0) * k * cx * 1.0, (lat0 - s.lat) * k ];
+  const xy = pts.map(P);
+  const path = xy.map((p, i) => (i ? "L" : "M") + p[0].toFixed(1) + " " + p[1].toFixed(1)).join(" ");
+  const labels = groups.map((g, i) => {
+    const [x, y] = xy[i]; const s = SEGMENTS[g.seg];
+    const right = g.seg !== "rom" && g.seg !== "ven" ? x < 120 : false;
+    const lx = g.seg === "lap" ? x - 10 : (g.seg === "par" ? x + 10 : x + 10);
+    const anchor = g.seg === "lap" ? "end" : "start";
+    const dy = g.seg === "flo" ? 4 : (g.seg === "ven" ? -2 : (g.seg === "rom" ? 6 : 4));
+    return `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="6" fill="${COLORS[g.seg]}" stroke="var(--bg)" stroke-width="2"/>
+      <text x="${lx.toFixed(1)}" y="${(y + dy).toFixed(1)}" text-anchor="${anchor}" font-size="12" font-weight="700" fill="var(--ink)">${esc(s.name)}</text>
+      <text x="${lx.toFixed(1)}" y="${(y + dy + 14).toFixed(1)}" text-anchor="${anchor}" font-size="10.5" fill="var(--muted)" font-family="var(--f-mono)">${g.days[0].date}–${g.days[g.days.length-1].date}</text>`;
+  }).join("");
+  return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="路線圖"><path d="${path}" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-dasharray="4 4"/>${labels}</svg>`;
+}
+
+function renderOv(){
+  const rows = DAYS.map(d => `<button class="ovrow" data-go="${d.i}" data-tabgo="day" style="--c:${d.c}"><span class="dt">${d.date}<small>${d.id} · ${d.wk}</small></span><span><span class="city">${esc(d.city)}</span><div class="acts">${d.plan.map(p => esc(p.title)).join(" · ")}</div></span><span class="stay"><b>住宿</b>${esc(d.stay)}</span></button>`).join("");
+  const sum = groups.map(g => `<div style="--c:${COLORS[g.seg]}"><b>${esc(SEGMENTS[g.seg].name)}</b><span>${g.days[0].date}–${g.days[g.days.length-1].date} · ${g.days.length} 天</span></div>`).join("");
+  return `<div id="ovmap" class="daymap ovmapbox"></div><div class="ov"><div class="ovlist">${rows}</div><div class="routebox">${routeSvg()}<div class="cap">台北出發，台北回程。點左邊任一天看詳細。</div><div class="segsum">${sum}</div></div></div>`;
+}
+
+function renderTr(){
+  const rows = groups.map(g => {
+    const ids = g.days.map(d => d.id);
+    const ls = LEGS.filter(l => ids.includes(l.day));
+    return ls.length ? `<section class="trgroup" style="--c:${COLORS[g.seg]}"><h3>${esc(SEGMENTS[g.seg].name)}<small>${g.days[0].date}–${g.days[g.days.length-1].date}</small></h3><div class="legs">${ls.map(l => legRow(l, true)).join("")}</div></section>` : "";
+  }).join("");
+  return `<div class="bk"><p class="lead">全程 ${LEGS.length} 段移動，照時間順序排。大部分當天搭就好，要先訂的機票和火車在「預訂與準備」裡。</p>${rows}</div>`;
+}
+
+function renderBk(){
+  const done = BOOKINGS.length - pending;
+  const rank = b => b.status === "已訂" ? 2 : opensInfo(b).open ? 0 : 1;
+  const sorted = BOOKINGS.slice().sort((a, b) => rank(a) - rank(b) || (rank(a) === 1 ? opensInfo(a).at - opensInfo(b).at : 0) || (+a.day.slice(1)) - (+b.day.slice(1)));
+  const nowOpen = BOOKINGS.filter(b => rank(b) === 0).length;
+  return `<div class="bk">
+  <div class="sec-t" style="margin-top:4px">要預訂的 ${BOOKINGS.length} 項</div>
+  <div class="prog"><span>${done} / ${BOOKINGS.length} 已訂・${nowOpen} 項現在就能訂</span><div class="bar"><span style="width:${BOOKINGS.length ? done / BOOKINGS.length * 100 : 0}%"></span></div></div>
+  <div class="list">${sorted.map(b => todoRow(b, true)).join("")}</div>
+  <p class="note">排序：現在就能訂的在最上面，接著是還沒開放的（依開放日期）。訂好哪一項跟 Claude 說一聲，狀態會更新在這裡（約一分鐘後生效）。</p>
+  <div class="sec-t">導遊與跟團</div>
+  <div class="prep">${GUIDES.map(g => `<div><dt>${esc(g.t)}<span class="need">${esc(g.need)}</span></dt><dd>${esc(g.d)}</dd></div>`).join("")}</div>
+  <div class="sec-t">出發前準備</div>
+  <div class="prep">${PREP.map(p => `<div><dt>${esc(p.t)}</dt><dd>${esc(p.d)}</dd></div>`).join("")}</div>
+  </div>`;
+}
+
+function render(){
+  document.querySelectorAll(".tab").forEach(t => t.setAttribute("aria-selected", t.dataset.tab === state.tab));
+  const main = document.getElementById("main");
+  main.innerHTML = state.tab === "day" ? renderDay() : state.tab === "ov" ? renderOv() : state.tab === "tr" ? renderTr() : renderBk();
+  renderStrip();
+  drawMaps();
+  store.set("hm-day", state.day); store.set("hm-tab", state.tab);
+}
+function go(i, toDay){
+  if (i < 0 || i >= DAYS.length) return;
+  state.day = i; if (toDay) state.tab = "day";
+  render();
+  const mainTop = document.getElementById("main").getBoundingClientRect().top + scrollY - 120;
+  if (scrollY > mainTop) scrollTo({top: Math.max(0, mainTop), behavior: "smooth"});
+}
+document.addEventListener("click", e => {
+  const tab = e.target.closest(".tab"); if (tab) { state.tab = tab.dataset.tab; render(); return; }
+  const g = e.target.closest("[data-go]"); if (g) go(+g.dataset.go, true);
+});
+document.addEventListener("keydown", e => {
+  if (state.tab !== "day" || e.target.closest("input,textarea")) return;
+  if (e.key === "ArrowRight") go(state.day + 1); if (e.key === "ArrowLeft") go(state.day - 1);
+});
+// swipe on day view (phones)
+let sx = null, sy0 = null;
+document.getElementById("main").addEventListener("touchstart", e => { sx = e.touches[0].clientX; sy0 = e.touches[0].clientY; }, {passive:true});
+document.getElementById("main").addEventListener("touchend", e => {
+  if (sx === null || state.tab !== "day") return;
+  const dx = e.changedTouches[0].clientX - sx, dy = e.changedTouches[0].clientY - sy0; sx = null;
+  if (Math.abs(dx) > 70 && Math.abs(dx) > Math.abs(dy) * 1.8) go(state.day + (dx < 0 ? 1 : -1));
+}, {passive:true});
+render();
+</script>
+
+</body>
+</html>
