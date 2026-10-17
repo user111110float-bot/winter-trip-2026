@@ -202,6 +202,8 @@ ol.plan li:first-child{border-top:0}
 .leaflet-container{font-family:var(--f-body)}
 .arrow span{display:block;width:0;height:0;margin:1px 0 0 2px;border-top:7px solid transparent;border-bottom:7px solid transparent;border-left:13px solid;filter:drop-shadow(0 0 1.5px #fff) drop-shadow(0 0 1px #fff)}
 .maphint{font-size:12px;color:var(--muted);margin-top:6px}
+.arrow.big span{border-top-width:8px;border-bottom-width:8px;border-left-width:15px}
+.plane{font-size:17px;line-height:20px;text-align:center;color:var(--ink);text-shadow:0 0 3px var(--bg),0 0 3px var(--bg)}
 </style>
 
 <style>body{margin:0}</style>
@@ -241,6 +243,7 @@ ol.plan li:first-child{border-top:0}
    - DAYS：照順序排，每天一筆；新增/刪除/調換順序後 D 編號與日期自動重排
        seg     過夜城市（對應 SEGMENTS 的 key）
        route   Google 地圖路線上的地點（照順序）；rmode = walking/driving/transit
+       hops    （換城市的日子）地圖上的完整移動：[地點, 怎麼到這裡 start/flight/train/car/walk/boat]
        plan    時間軸 { t 時間, title, desc, map(可選：Google 地圖搜尋字) }
        hl      亮點 { tag, title, desc }
    - BOOKINGS 預訂清單、LEGS 交通、PREP 出發前準備、GUIDES 導遊（各自上方有欄位說明）
@@ -262,6 +265,7 @@ const SEGMENTS = {
 const DAYS = [
   { seg:"lap", city:"台北 → 羅瓦涅米", short:"抵達極圈", theme:"啟程・極夜的召喚",
     route:["Rovaniemi Airport", "Rovaniemi city centre"], rmode:"driving",
+    hops:[["Taipei Taoyuan Airport","start"],["Helsinki Airport","flight"],["Rovaniemi Airport","flight"],["Rovaniemi city centre","car"]],
     plan:[
       {t:"前晚深夜", title:"12/18 桃園出發", desc:"台北沒有直飛芬蘭，搭夜班機到香港或東京，轉芬蘭航空飛赫爾辛基"},
       {t:"清晨", title:"赫爾辛基轉國內線", desc:"入境申根、行李直掛到羅瓦涅米；快閃 Moomin 咖啡，買極光手套"},
@@ -322,6 +326,7 @@ const DAYS = [
 
   { seg:"par", city:"羅瓦涅米 → 巴黎迪士尼", short:"飛往巴黎", theme:"從極夜飛向燈火",
     route:["Paris Charles de Gaulle Airport", "Disneyland Park Paris"], rmode:"driving",
+    hops:[["Santa Claus Village Rovaniemi","start"],["Rovaniemi Airport","car"],["Helsinki Airport","flight"],["Paris Charles de Gaulle Airport","flight"],["Disneyland Park Paris","car"]],
     plan:[
       {t:"10:00", title:"最後的雪地早餐", desc:"樹屋早餐，窗外是粉色晨光；退房後請櫃台叫車去機場（約 10 分鐘）"},
       {t:"中午", title:"RVN → HEL → CDG", desc:"同一張機票、行李直掛巴黎；申根境內不用再過海關"},
@@ -399,6 +404,7 @@ const DAYS = [
 
   { seg:"ven", city:"巴黎 → 威尼斯", short:"飛往水都", theme:"午後・跌進水色裡",
     route:["Venice Marco Polo Airport", "Piazza San Marco Venice"], rmode:"transit",
+    hops:[["Le Marais Paris","start"],["Paris Charles de Gaulle Airport","car"],["Venice Marco Polo Airport","flight"],["Piazza San Marco Venice","boat"]],
     plan:[
       {t:"10:00", title:"瑪黑最後咖啡", desc:"Boot Café 小白咖啡，帶走可麗露", map:"Boot Café Paris"},
       {t:"13:30", title:"CDG → VCE", desc:"法航午後班，飛越阿爾卑斯山"},
@@ -429,6 +435,7 @@ const DAYS = [
 
   { seg:"flo", city:"威尼斯 → 佛羅倫斯", short:"佛羅倫斯日落", theme:"百花・夕陽下的圓頂",
     route:["Firenze Santa Maria Novella", "Mercato Centrale Firenze", "Cattedrale di Santa Maria del Fiore", "Piazzale Michelangelo", "Ponte Vecchio", "Piazza della Repubblica Florence"], rmode:"walking",
+    hops:[["Piazza San Marco Venice","start"],["Venezia Santa Lucia","boat"],["Firenze Santa Maria Novella","train"],["Mercato Centrale Firenze","walk"],["Cattedrale di Santa Maria del Fiore","walk"],["Piazzale Michelangelo","walk"],["Ponte Vecchio","walk"],["Piazza della Repubblica Florence","walk"]],
     plan:[
       {t:"09:00", title:"高鐵到佛羅倫斯", desc:"威尼斯 Santa Lucia 直達佛羅倫斯約 2 小時，大運河掰掰"},
       {t:"11:30", title:"中央市場", desc:"中央市場牛肚包，站著吃，像當地人", map:"Mercato Centrale Firenze"},
@@ -445,6 +452,7 @@ const DAYS = [
 
   { seg:"rom", city:"佛羅倫斯 → 羅馬・鬥獸場・跨年", short:"鬥獸場＋跨年", theme:"古城・許願池的吻",
     route:["Roma Termini", "Trastevere Rome", "Colosseum", "Roman Forum", "Trevi Fountain"], rmode:"walking",
+    hops:[["Piazza della Repubblica Florence","start"],["Firenze Santa Maria Novella","walk"],["Roma Termini","train"],["Trastevere Rome","car"],["Colosseum","car"],["Roman Forum","walk"],["Trevi Fountain","walk"]],
     plan:[
       {t:"08:30", title:"高鐵到羅馬", desc:"Frecciarossa 約 1.5 小時，10 點前到羅馬 Termini"},
       {t:"11:00", title:"公寓寄放行李", desc:"Trastevere 石板小巷，先寄行李（入住時間跟房東確認）", map:"Trastevere Roma"},
@@ -491,6 +499,7 @@ const DAYS = [
 
   { seg:"rom", city:"羅馬 → 台北", short:"回家", theme:"帶著光回家",
     route:["Trastevere Rome", "Rome Fiumicino Airport"], rmode:"driving",
+    hops:[["Trastevere Rome","start"],["Rome Fiumicino Airport","car"],["Taipei Taoyuan Airport","flight"]],
     plan:[
       {t:"07:00", title:"出發去 FCO", desc:"Leonardo Express，退稅要提早 3 小時到，買最後的檸檬酒"},
       {t:"約 10:30", title:"起飛", desc:"華航羅馬直飛台北（每週三、日各一班），約 12.5 小時，機上整理 16 天照片"},
@@ -596,8 +605,8 @@ const GUIDES = [
 ];
 /* ======================= 資料到此為止 ======================= */
 
-const COORDS = {"Rovaniemi Airport": [66.558, 25.8275], "Rovaniemi city centre": [66.503, 25.729], "Santa Claus Village Rovaniemi": [66.5435, 25.8476], "Ranua Zoo": [65.9434, 26.467], "Paris Charles de Gaulle Airport": [49.0079, 2.5508], "Disneyland Park Paris": [48.8711, 2.7788], "Disney Adventure World Paris": [48.8681, 2.7804], "La Vallée Village": [48.8546, 2.7838], "Le Marais Paris": [48.8612, 2.3582], "Avenue Montaigne Paris": [48.8663, 2.3045], "Rue du Faubourg Saint-Honoré Paris": [48.8695, 2.319], "Galeries Lafayette Haussmann": [48.8735, 2.332], "Louvre Museum": [48.8606, 2.3376], "Merci 111 Boulevard Beaumarchais Paris": [48.8607, 2.3668], "Bateaux Parisiens Port de la Bourdonnais": [48.8574, 2.2905], "Le Jules Verne Paris": [48.8584, 2.2945], "Venice Marco Polo Airport": [45.5047, 12.3466], "Piazza San Marco Venice": [45.4342, 12.3385], "Piazza San Marco": [45.4342, 12.3385], "Doge's Palace Venice": [45.4337, 12.3404], "Burano": [45.4854, 12.4167], "Firenze Santa Maria Novella": [43.7767, 11.2479], "Mercato Centrale Firenze": [43.7765, 11.2528], "Cattedrale di Santa Maria del Fiore": [43.7731, 11.256], "Piazzale Michelangelo": [43.7629, 11.2651], "Ponte Vecchio": [43.7679, 11.2531], "Piazza della Repubblica Florence": [43.7715, 11.254], "Roma Termini": [41.9013, 12.5016], "Trastevere Rome": [41.8848, 12.4704], "Colosseum": [41.8902, 12.4922], "Roman Forum": [41.8921, 12.4864], "Trevi Fountain": [41.9009, 12.4833], "Piazza San Pietro": [41.9022, 12.4567], "Ponte Sant'Angelo": [41.9017, 12.4665], "Piazza Navona": [41.8992, 12.4731], "Vatican Museums": [41.9065, 12.4536], "St. Peter's Basilica": [41.9022, 12.4539], "Trattoria Da Enzo al 29 Rome": [41.8881, 12.4779], "Rome Fiumicino Airport": [41.8035, 12.2519]};
-const PLABEL = {"Rovaniemi city centre": "羅瓦涅米市區", "Santa Claus Village Rovaniemi": "聖誕老人村", "Rovaniemi Airport": "羅瓦涅米機場", "Ranua Zoo": "Ranua 動物園", "Paris Charles de Gaulle Airport": "CDG 機場", "Disneyland Park Paris": "迪士尼樂園", "Disney Adventure World Paris": "Adventure World", "La Vallée Village": "La Vallée Village", "Le Marais Paris": "瑪黑區", "Avenue Montaigne Paris": "蒙田大道", "Rue du Faubourg Saint-Honoré Paris": "聖奧諾雷市郊路", "Galeries Lafayette Haussmann": "老佛爺百貨", "Louvre Museum": "羅浮宮", "Merci 111 Boulevard Beaumarchais Paris": "Merci", "Bateaux Parisiens Port de la Bourdonnais": "遊船碼頭", "Le Jules Verne Paris": "Jules Verne（鐵塔）", "Venice Marco Polo Airport": "威尼斯機場", "Piazza San Marco Venice": "聖馬可區", "Piazza San Marco": "聖馬可廣場", "Doge's Palace Venice": "道奇宮", "Burano": "Burano", "Firenze Santa Maria Novella": "佛羅倫斯車站", "Mercato Centrale Firenze": "中央市場", "Cattedrale di Santa Maria del Fiore": "百花大教堂", "Piazzale Michelangelo": "米開朗基羅廣場", "Ponte Vecchio": "老橋", "Piazza della Repubblica Florence": "共和廣場", "Roma Termini": "Termini 車站", "Trastevere Rome": "Trastevere", "Colosseum": "鬥獸場", "Roman Forum": "古羅馬廣場", "Trevi Fountain": "特萊維噴泉", "Piazza San Pietro": "聖彼得廣場", "Ponte Sant'Angelo": "聖天使橋", "Piazza Navona": "納沃納廣場", "Vatican Museums": "梵蒂岡博物館", "St. Peter's Basilica": "聖彼得大教堂", "Trattoria Da Enzo al 29 Rome": "Da Enzo", "Rome Fiumicino Airport": "羅馬機場"};
+const COORDS = {"Taipei Taoyuan Airport": [25.0797, 121.2342], "Helsinki Airport": [60.3172, 24.9633], "Rovaniemi Airport": [66.558, 25.8275], "Rovaniemi city centre": [66.503, 25.729], "Santa Claus Village Rovaniemi": [66.5435, 25.8476], "Ranua Zoo": [65.9434, 26.467], "Paris Charles de Gaulle Airport": [49.0079, 2.5508], "Disneyland Park Paris": [48.8711, 2.7788], "Disney Adventure World Paris": [48.8681, 2.7804], "La Vallée Village": [48.8546, 2.7838], "Le Marais Paris": [48.8612, 2.3582], "Avenue Montaigne Paris": [48.8663, 2.3045], "Rue du Faubourg Saint-Honoré Paris": [48.8695, 2.319], "Galeries Lafayette Haussmann": [48.8735, 2.332], "Louvre Museum": [48.8606, 2.3376], "Merci 111 Boulevard Beaumarchais Paris": [48.8607, 2.3668], "Bateaux Parisiens Port de la Bourdonnais": [48.8574, 2.2905], "Le Jules Verne Paris": [48.8584, 2.2945], "Venice Marco Polo Airport": [45.5047, 12.3466], "Piazza San Marco Venice": [45.4342, 12.3385], "Piazza San Marco": [45.4342, 12.3385], "Doge's Palace Venice": [45.4337, 12.3404], "Burano": [45.4854, 12.4167], "Venezia Santa Lucia": [45.4411, 12.321], "Firenze Santa Maria Novella": [43.7767, 11.2479], "Mercato Centrale Firenze": [43.7765, 11.2528], "Cattedrale di Santa Maria del Fiore": [43.7731, 11.256], "Piazzale Michelangelo": [43.7629, 11.2651], "Ponte Vecchio": [43.7679, 11.2531], "Piazza della Repubblica Florence": [43.7715, 11.254], "Roma Termini": [41.9013, 12.5016], "Trastevere Rome": [41.8848, 12.4704], "Colosseum": [41.8902, 12.4922], "Roman Forum": [41.8921, 12.4864], "Trevi Fountain": [41.9009, 12.4833], "Piazza San Pietro": [41.9022, 12.4567], "Ponte Sant'Angelo": [41.9017, 12.4665], "Piazza Navona": [41.8992, 12.4731], "Vatican Museums": [41.9065, 12.4536], "St. Peter's Basilica": [41.9022, 12.4539], "Trattoria Da Enzo al 29 Rome": [41.8881, 12.4779], "Rome Fiumicino Airport": [41.8035, 12.2519]};
+const PLABEL = {"Taipei Taoyuan Airport": "桃園機場", "Helsinki Airport": "赫爾辛基機場", "Rovaniemi city centre": "羅瓦涅米市區", "Santa Claus Village Rovaniemi": "聖誕老人村", "Rovaniemi Airport": "羅瓦涅米機場", "Ranua Zoo": "Ranua 動物園", "Paris Charles de Gaulle Airport": "CDG 機場", "Disneyland Park Paris": "迪士尼樂園", "Disney Adventure World Paris": "Adventure World", "La Vallée Village": "La Vallée Village", "Le Marais Paris": "瑪黑區", "Avenue Montaigne Paris": "蒙田大道", "Rue du Faubourg Saint-Honoré Paris": "聖奧諾雷市郊路", "Galeries Lafayette Haussmann": "老佛爺百貨", "Louvre Museum": "羅浮宮", "Merci 111 Boulevard Beaumarchais Paris": "Merci", "Bateaux Parisiens Port de la Bourdonnais": "遊船碼頭", "Le Jules Verne Paris": "Jules Verne（鐵塔）", "Venice Marco Polo Airport": "威尼斯機場", "Piazza San Marco Venice": "聖馬可區", "Piazza San Marco": "聖馬可廣場", "Doge's Palace Venice": "道奇宮", "Burano": "Burano", "Venezia Santa Lucia": "威尼斯車站", "Firenze Santa Maria Novella": "佛羅倫斯車站", "Mercato Centrale Firenze": "中央市場", "Cattedrale di Santa Maria del Fiore": "百花大教堂", "Piazzale Michelangelo": "米開朗基羅廣場", "Ponte Vecchio": "老橋", "Piazza della Repubblica Florence": "共和廣場", "Roma Termini": "Termini 車站", "Trastevere Rome": "Trastevere", "Colosseum": "鬥獸場", "Roman Forum": "古羅馬廣場", "Trevi Fountain": "特萊維噴泉", "Piazza San Pietro": "聖彼得廣場", "Ponte Sant'Angelo": "聖天使橋", "Piazza Navona": "納沃納廣場", "Vatican Museums": "梵蒂岡博物館", "St. Peter's Basilica": "聖彼得大教堂", "Trattoria Da Enzo al 29 Rome": "Da Enzo", "Rome Fiumicino Airport": "羅馬機場"};
 
 let _maps = [];
 function drawMaps(){
@@ -605,21 +614,31 @@ function drawMaps(){
   if (!window.L) return;
   const css = getComputedStyle(document.documentElement);
   const mk = (el, seq, color) => {
-    // seq: ordered stops [{ll, name}], may revisit a place (e.g. back to the hotel)
-    const m = L.map(el, {scrollWheelZoom:false, attributionControl:true});
+    // seq: ordered stops [{ll, name, how}], how = how you reach this stop (flight/train/car/walk/boat)
+    const m = L.map(el, {scrollWheelZoom:false, attributionControl:true, worldCopyJump:false});
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom:18, attribution:'&copy; OpenStreetMap'}).addTo(m);
-    const P = ll => L.CRS.EPSG3857.project(L.latLng(ll));
+    const E = L.CRS.EPSG3857;
+    const arrow = (pt, deg, size) => L.marker(E.unproject(pt), {interactive:false, keyboard:false, icon:L.divIcon({className:'arrow' + (size ? ' big' : ''), html:`<span style="transform:rotate(${deg}deg);border-left-color:${color}"></span>`, iconSize:[18,18], iconAnchor:[9,9]})}).addTo(m);
+    const ang = (a, b) => Math.atan2(-(b.y - a.y), b.x - a.x) * 180 / Math.PI;
     for (let i = 0; i < seq.length - 1; i++) {
-      const a = seq[i].ll, b = seq[i + 1].ll;
+      const a = seq[i].ll, b = seq[i + 1].ll, how = seq[i + 1].how || 'walk';
       if (a[0] === b[0] && a[1] === b[1]) continue;
-      L.polyline([a, b], {color, weight:3, opacity:.75, dashArray:'6 6'}).addTo(m);
-      const pa = P(a), pb = P(b);
-      const deg = Math.atan2(-(pb.y - pa.y), pb.x - pa.x) * 180 / Math.PI;
-      [0.42].forEach(f => {
-        const mid = L.CRS.EPSG3857.unproject(L.point(pa.x + (pb.x - pa.x) * f, pa.y + (pb.y - pa.y) * f));
-        const icon = L.divIcon({className:'arrow', html:`<span style="transform:rotate(${deg}deg);border-left-color:${color}"></span>`, iconSize:[16,16], iconAnchor:[8,8]});
-        L.marker(mid, {icon, interactive:false, keyboard:false}).addTo(m);
-      });
+      const pa = E.project(L.latLng(a)), pb = E.project(L.latLng(b));
+      if (how === 'flight') {
+        const dx = pb.x - pa.x, dy = pb.y - pa.y, len = Math.hypot(dx, dy);
+        const c = L.point((pa.x + pb.x) / 2 - dy * 0.18, (pa.y + pb.y) / 2 + dx * 0.18);
+        const q = s => L.point((1-s)*(1-s)*pa.x + 2*(1-s)*s*c.x + s*s*pb.x, (1-s)*(1-s)*pa.y + 2*(1-s)*s*c.y + s*s*pb.y);
+        const pts = []; for (let k = 0; k <= 40; k++) pts.push(E.unproject(q(k / 40)));
+        L.polyline(pts, {color, weight:2.5, opacity:.85, dashArray:'2 7', lineCap:'round'}).addTo(m)
+          .bindTooltip(`✈ ${seq[i].name} → ${seq[i+1].name}`, {sticky:true});
+        const p1 = q(0.48), p2 = q(0.52);
+        arrow(q(0.5), ang(p1, p2), true);
+        L.marker(E.unproject(q(0.5)), {interactive:false, keyboard:false, icon:L.divIcon({className:'plane', html:'✈', iconSize:[20,20], iconAnchor:[10,24]})}).addTo(m);
+      } else {
+        const style = how === 'train' ? {weight:4, opacity:.85} : how === 'boat' ? {weight:3, opacity:.8, dashArray:'1 6', lineCap:'round'} : {weight:3, opacity:.75, dashArray:'6 6'};
+        L.polyline([a, b], Object.assign({color}, style)).addTo(m);
+        arrow(L.point(pa.x + (pb.x - pa.x) * 0.42, pa.y + (pb.y - pa.y) * 0.42), ang(pa, pb), how === 'train');
+      }
     }
     const first = new Map();
     seq.forEach((s, i) => { const k = s.ll.join(','); if (!first.has(k)) first.set(k, {s, nums:[i + 1]}); else first.get(k).nums.push(i + 1); });
@@ -628,18 +647,21 @@ function drawMaps(){
       L.marker(s.ll, {icon}).addTo(m).bindTooltip(nums.length > 1 ? `${s.name}（第 ${nums.join('、')} 站）` : s.name, {direction:'top', offset:[0,-10]});
     });
     const ll = [...first.values()].map(v => v.s.ll);
-    if (ll.length === 1) m.setView(ll[0], 14); else m.fitBounds(ll, {padding:[30,30]});
+    if (ll.length === 1) m.setView(ll[0], 14); else m.fitBounds(ll, {padding:[34,34]});
     _maps.push(m);
   };
   const dm = document.getElementById('daymap');
   if (dm) {
     const d = DAYS[state.day];
-    const seq = (d.route || []).filter(n => COORDS[n]).map(n => ({ll:COORDS[n], name:PLABEL[n] || n}));
+    const src = d.hops ? d.hops : (d.route || []).map((n, i) => [n, i ? (d.rmode === 'driving' ? 'car' : 'walk') : 'start']);
+    const seq = src.filter(h => COORDS[h[0]]).map(h => ({ll:COORDS[h[0]], name:PLABEL[h[0]] || h[0], how:h[1]}));
     if (seq.length) mk(dm, seq, css.getPropertyValue(d.c.slice(4, -1)).trim() || '#333'); else dm.hidden = true;
   }
   const om = document.getElementById('ovmap');
   if (om) {
-    const pts = groups.map(g => ({ll:[SEGMENTS[g.seg].lat, SEGMENTS[g.seg].lon], name:SEGMENTS[g.seg].name}));
+    const TPE = {ll:COORDS["Taipei Taoyuan Airport"], name:"台北", how:"flight"};
+    const OVHOW = {par:'flight', ven:'flight', flo:'train', rom:'train'};
+    const pts = [Object.assign({}, TPE, {how:'start'})].concat(groups.map(g => ({ll:[SEGMENTS[g.seg].lat, SEGMENTS[g.seg].lon], name:SEGMENTS[g.seg].name, how:OVHOW[g.seg] || 'flight'})), [TPE]);
     mk(om, pts, css.getPropertyValue('--ink').trim());
   }
 }
@@ -736,7 +758,7 @@ function renderDay(){
       <div class="nav"><button data-go="${state.day - 1}" ${prev ? "" : "disabled"} aria-label="前一天">← 前一天</button><button data-go="${state.day + 1}" ${next ? "" : "disabled"} aria-label="後一天">後一天 →</button></div></div>
     <h2>${esc(d.city)}</h2>
     <div class="theme">${esc(d.theme)}</div>
-    <div id="daymap" class="daymap"></div><div class="maphint">數字是當天的順序，箭頭是移動方向；滑過或點地點看名稱</div>
+    <div id="daymap" class="daymap"></div><div class="maphint">數字是當天的順序，箭頭是移動方向；✈ 點狀弧線＝飛機，實線＝火車，虛線＝當地移動（點點＝搭船）</div>
     ${routeUrl(d) ? `<a class="routebtn" href="${routeUrl(d)}" target="_blank" rel="noopener">在 Google 地圖看今天路線<span>${d.route.length} 個地點</span></a>` : ""}
     <dl class="facts"><div><dt>住宿</dt><dd>${esc(d.stay)}</dd></div><div><dt>交通</dt><dd>${esc(d.transport)}</dd></div><div><dt>氣溫</dt><dd>${esc(d.temp)}</dd></div></dl>
     <div class="sec-t">今日行程</div>
@@ -772,7 +794,7 @@ function routeSvg(){
 function renderOv(){
   const rows = DAYS.map(d => `<button class="ovrow" data-go="${d.i}" data-tabgo="day" style="--c:${d.c}"><span class="dt">${d.date}<small>${d.id} · ${d.wk}</small></span><span><span class="city">${esc(d.city)}</span><div class="acts">${d.plan.map(p => esc(p.title)).join(" · ")}</div></span><span class="stay"><b>住宿</b>${esc(d.stay)}</span></button>`).join("");
   const sum = groups.map(g => `<div style="--c:${COLORS[g.seg]}"><b>${esc(SEGMENTS[g.seg].name)}</b><span>${g.days[0].date}–${g.days[g.days.length-1].date} · ${g.days.length} 天</span></div>`).join("");
-  return `<div id="ovmap" class="daymap ovmapbox"></div><div class="ov"><div class="ovlist">${rows}</div><div class="routebox">${routeSvg()}<div class="cap">台北出發，台北回程。點左邊任一天看詳細。</div><div class="segsum">${sum}</div></div></div>`;
+  return `<div id="ovmap" class="daymap ovmapbox"></div><div class="maphint">全程路線：✈ 點狀弧線＝飛機，實線＝火車</div><div class="ov"><div class="ovlist">${rows}</div><div class="routebox">${routeSvg()}<div class="cap">台北出發，台北回程。點左邊任一天看詳細。</div><div class="segsum">${sum}</div></div></div>`;
 }
 
 function renderTr(){
