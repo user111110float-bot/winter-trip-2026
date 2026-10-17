@@ -365,20 +365,22 @@ const DAYS = [
     tips:"Anna 和 Elsa 的見面在 8:45 開放 App 虛擬排隊。多日門票本來就能兩個園區進出。聖誕當天人多，Frozen 一入園先去，再抽 Premier Access。",
     stay:"迪士尼園區飯店・第三晚", transport:"全天步行・平均 18k 步", temp:"5°C・體感 2°C 風大" },
 
-  { seg:"par", city:"退房・La Vallée Village 精品購物 → 巴黎", short:"精品購物", theme:"購物日・把巴黎的閃亮帶回家",
-    route:["Disneyland Park Paris","La Vallée Village","Le Marais Paris"], rmode:"driving",
+  { seg:"par", city:"Outlet → 巴黎精品街", short:"精品購物", theme:"購物日・把巴黎的閃亮帶回家",
+    route:["Disneyland Park Paris","La Vallée Village","Le Marais Paris","Avenue Montaigne Paris","Rue du Faubourg Saint-Honoré Paris","Galeries Lafayette Haussmann"], rmode:"driving",
     plan:[
       {t:"09:30", title:"早餐、退房", desc:"行李直接帶上計程車，不用再回飯店拿"},
-      {t:"10:00", title:"La Vallée Village", desc:"計程車約 10 分鐘；一到先把行李寄放在接駁車下車區（1–4 件一天 €10），再輕鬆逛", map:"La Vallée Village"},
-      {t:"13:00", title:"村內午餐", desc:"逛累了在村裡的餐廳或咖啡店休息"},
-      {t:"16:00", title:"搭計程車進巴黎", desc:"領回行李，約 45–60 分鐘到瑪黑公寓", map:"Le Marais Paris"},
+      {t:"10:00", title:"La Vallée Village", desc:"計程車約 10 分鐘；行李寄放在接駁車下車區（1–4 件一天 €10），逛精品 outlet，在村裡簡單吃午餐", map:"La Vallée Village"},
+      {t:"13:30", title:"進巴黎，先放行李", desc:"計程車約 45–60 分鐘到瑪黑公寓，把行李和戰利品放下（先跟房東確認可以提早放）", map:"Le Marais Paris"},
+      {t:"15:00", title:"蒙田大道", desc:"精品旗艦店一條街；從瑪黑搭地鐵 1 號線直達 Franklin D. Roosevelt 站", map:"Avenue Montaigne Paris"},
+      {t:"17:00", title:"聖奧諾雷市郊路", desc:"走路約 15 分鐘，Hermès 總店和一整排精品店都在這條街", map:"Rue du Faubourg Saint-Honoré Paris"},
+      {t:"19:00", title:"老佛爺百貨 Haussmann", desc:"開到 20:30，各大精品專櫃都在；看圓頂下的聖誕樹，在附近吃晚餐再回瑪黑", map:"Galeries Lafayette Haussmann"},
     ],
     hl:[
-      {tag:"購物", title:"精品 outlet", desc:"一百多家精品和設計師品牌的過季商品，就在迪士尼隔壁"},
-      {tag:"提醒", title:"想買當季新品", desc:"Chanel、Hermès、Louis Vuitton 這類品牌不在 outlet，要去巴黎市區的專櫃"},
+      {tag:"購物", title:"Outlet 撿過季", desc:"一百多家精品和設計師品牌的過季商品，就在迪士尼隔壁"},
+      {tag:"購物", title:"市區買當季", desc:"Chanel、Hermès、Louis Vuitton 這類不進 outlet 的牌子，下午在蒙田大道、聖奧諾雷市郊路和老佛爺補齊"},
     ],
-    tips:"12/26 是週六人多，開門就到最好逛。同一家店消費滿 €100.01 可以退稅，結帳時要出示護照正本。退稅單要在離開歐盟時辦，這趟是在羅馬機場，退稅商品要隨身帶著給海關看。",
-    stay:"Le Marais 瑪黑公寓（2 晚）", transport:"計程車 迪士尼 → La Vallée Village → 瑪黑", temp:"7°C・逛街大多在戶外走廊" },
+    tips:"12/26 是週六，精品店都有開，但聖誕假期人很多。想買熱門包款，先上品牌官網看能不能預約到店，或當天一早線上排隊。週日（12/27）精品店大多休息，只有老佛爺、春天這類百貨確定有開。同一家店滿 €100.01 可退稅，結帳出示護照正本；退稅單在羅馬機場離開歐盟時一起辦。",
+    stay:"Le Marais 瑪黑公寓（2 晚）", transport:"計程車 迪士尼 → Outlet → 瑪黑・地鐵 1 號線", temp:"7°C・市區走路多，穿好走的鞋" },
 
   { seg:"par", city:"巴黎市區・羅浮宮", short:"巴黎漫步", theme:"巴黎・為妳們的家",
     route:["Le Marais Paris", "Louvre Museum", "Merci 111 Boulevard Beaumarchais Paris", "Bateaux Parisiens Port de la Bourdonnais", "Le Jules Verne Paris"], rmode:"walking",
@@ -549,7 +551,10 @@ const LEGS = [
   {day:"D5", from:"CDG 機場", to:"迪士尼園區飯店", mode:"計程車 / TGV", how:"計程車跳表約 €70–100，約 40 分鐘；或在 2 航廈搭 TGV 10 分鐘到 Marne-la-Vallée，下車走到飯店。", tip:"巴黎市區的計程車固定價不適用迪士尼。Magical Shuttle 巴士便宜，但塞車可能要 1.5 小時。"},
   {day:"D6", from:"迪士尼園區飯店", to:"樂園", mode:"步行", how:"飯店有專屬入口直通 Disneyland Park。", tip:""},
   {day:"D8", from:"迪士尼園區飯店", to:"La Vallée Village", mode:"計程車", how:"約 10 分鐘。到了把行李寄放在接駁車下車區（1–4 件一天 €10）。", tip:"也可以搭 RER A 一站到 Val d'Europe，再走 10 分鐘，但帶行李不方便。"},
-  {day:"D8", from:"La Vallée Village", to:"瑪黑公寓", mode:"計程車 / Uber", how:"約 45–60 分鐘，約 €60–90。", tip:"買了很多東西就別搭 RER 了。"},
+  {day:"D8", from:"La Vallée Village", to:"瑪黑公寓", mode:"計程車 / Uber", how:"約 45–60 分鐘，約 €60–90。先放行李再出門逛。", tip:"買了很多東西就別搭 RER 了。"},
+  {day:"D8", from:"瑪黑", to:"蒙田大道", mode:"地鐵", how:"1 號線從 Saint-Paul 站直達 Franklin D. Roosevelt 站，約 15 分鐘，單程 €2.55。", tip:""},
+  {day:"D8", from:"蒙田大道", to:"聖奧諾雷市郊路 → 老佛爺", mode:"步行", how:"蒙田大道走到聖奧諾雷市郊路約 15 分鐘，再走到老佛爺約 15 分鐘。", tip:"買太多就直接叫計程車。"},
+  {day:"D8", from:"老佛爺", to:"瑪黑", mode:"計程車 / 地鐵", how:"計程車約 20 分鐘；地鐵要轉一次車。", tip:""},
   {day:"D9", from:"瑪黑", to:"羅浮宮、鐵塔、遊船碼頭", mode:"地鐵", how:"單程票 €2.55。用 Île-de-France Mobilités App 買手機票，或買一張 Navigo Easy 卡（€2）加值。", tip:"兩個人一天大概搭 4–6 趟，單程票就夠。"},
   {day:"D10", from:"瑪黑", to:"CDG 機場", mode:"計程車", how:"右岸到 CDG 固定價 €56，約 45 分鐘。", tip:"機場線 RER B 單程 €14，帶行李不建議。"},
   {day:"D10", from:"巴黎 CDG", to:"威尼斯 VCE", mode:"飛機", how:"直飛約 1.5 小時。", tip:"申根境內航班。"},
@@ -591,8 +596,8 @@ const GUIDES = [
 ];
 /* ======================= 資料到此為止 ======================= */
 
-const COORDS = {"Rovaniemi Airport": [66.558, 25.8275], "Rovaniemi city centre": [66.503, 25.729], "Santa Claus Village Rovaniemi": [66.5435, 25.8476], "Ranua Zoo": [65.9434, 26.467], "Paris Charles de Gaulle Airport": [49.0079, 2.5508], "Disneyland Park Paris": [48.8711, 2.7788], "Disney Adventure World Paris": [48.8681, 2.7804], "La Vallée Village": [48.8546, 2.7838], "Le Marais Paris": [48.8612, 2.3582], "Louvre Museum": [48.8606, 2.3376], "Merci 111 Boulevard Beaumarchais Paris": [48.8607, 2.3668], "Bateaux Parisiens Port de la Bourdonnais": [48.8574, 2.2905], "Le Jules Verne Paris": [48.8584, 2.2945], "Venice Marco Polo Airport": [45.5047, 12.3466], "Piazza San Marco Venice": [45.4342, 12.3385], "Piazza San Marco": [45.4342, 12.3385], "Doge's Palace Venice": [45.4337, 12.3404], "Burano": [45.4854, 12.4167], "Firenze Santa Maria Novella": [43.7767, 11.2479], "Mercato Centrale Firenze": [43.7765, 11.2528], "Cattedrale di Santa Maria del Fiore": [43.7731, 11.256], "Piazzale Michelangelo": [43.7629, 11.2651], "Ponte Vecchio": [43.7679, 11.2531], "Piazza della Repubblica Florence": [43.7715, 11.254], "Roma Termini": [41.9013, 12.5016], "Trastevere Rome": [41.8848, 12.4704], "Colosseum": [41.8902, 12.4922], "Roman Forum": [41.8921, 12.4864], "Trevi Fountain": [41.9009, 12.4833], "Piazza San Pietro": [41.9022, 12.4567], "Ponte Sant'Angelo": [41.9017, 12.4665], "Piazza Navona": [41.8992, 12.4731], "Vatican Museums": [41.9065, 12.4536], "St. Peter's Basilica": [41.9022, 12.4539], "Trattoria Da Enzo al 29 Rome": [41.8881, 12.4779], "Rome Fiumicino Airport": [41.8035, 12.2519]};
-const PLABEL = {"Rovaniemi city centre": "羅瓦涅米市區", "Santa Claus Village Rovaniemi": "聖誕老人村", "Rovaniemi Airport": "羅瓦涅米機場", "Ranua Zoo": "Ranua 動物園", "Paris Charles de Gaulle Airport": "CDG 機場", "Disneyland Park Paris": "迪士尼樂園", "Disney Adventure World Paris": "Adventure World", "La Vallée Village": "La Vallée Village", "Le Marais Paris": "瑪黑區", "Louvre Museum": "羅浮宮", "Merci 111 Boulevard Beaumarchais Paris": "Merci", "Bateaux Parisiens Port de la Bourdonnais": "遊船碼頭", "Le Jules Verne Paris": "Jules Verne（鐵塔）", "Venice Marco Polo Airport": "威尼斯機場", "Piazza San Marco Venice": "聖馬可區", "Piazza San Marco": "聖馬可廣場", "Doge's Palace Venice": "道奇宮", "Burano": "Burano", "Firenze Santa Maria Novella": "佛羅倫斯車站", "Mercato Centrale Firenze": "中央市場", "Cattedrale di Santa Maria del Fiore": "百花大教堂", "Piazzale Michelangelo": "米開朗基羅廣場", "Ponte Vecchio": "老橋", "Piazza della Repubblica Florence": "共和廣場", "Roma Termini": "Termini 車站", "Trastevere Rome": "Trastevere", "Colosseum": "鬥獸場", "Roman Forum": "古羅馬廣場", "Trevi Fountain": "特萊維噴泉", "Piazza San Pietro": "聖彼得廣場", "Ponte Sant'Angelo": "聖天使橋", "Piazza Navona": "納沃納廣場", "Vatican Museums": "梵蒂岡博物館", "St. Peter's Basilica": "聖彼得大教堂", "Trattoria Da Enzo al 29 Rome": "Da Enzo", "Rome Fiumicino Airport": "羅馬機場"};
+const COORDS = {"Rovaniemi Airport": [66.558, 25.8275], "Rovaniemi city centre": [66.503, 25.729], "Santa Claus Village Rovaniemi": [66.5435, 25.8476], "Ranua Zoo": [65.9434, 26.467], "Paris Charles de Gaulle Airport": [49.0079, 2.5508], "Disneyland Park Paris": [48.8711, 2.7788], "Disney Adventure World Paris": [48.8681, 2.7804], "La Vallée Village": [48.8546, 2.7838], "Le Marais Paris": [48.8612, 2.3582], "Avenue Montaigne Paris": [48.8663, 2.3045], "Rue du Faubourg Saint-Honoré Paris": [48.8695, 2.319], "Galeries Lafayette Haussmann": [48.8735, 2.332], "Louvre Museum": [48.8606, 2.3376], "Merci 111 Boulevard Beaumarchais Paris": [48.8607, 2.3668], "Bateaux Parisiens Port de la Bourdonnais": [48.8574, 2.2905], "Le Jules Verne Paris": [48.8584, 2.2945], "Venice Marco Polo Airport": [45.5047, 12.3466], "Piazza San Marco Venice": [45.4342, 12.3385], "Piazza San Marco": [45.4342, 12.3385], "Doge's Palace Venice": [45.4337, 12.3404], "Burano": [45.4854, 12.4167], "Firenze Santa Maria Novella": [43.7767, 11.2479], "Mercato Centrale Firenze": [43.7765, 11.2528], "Cattedrale di Santa Maria del Fiore": [43.7731, 11.256], "Piazzale Michelangelo": [43.7629, 11.2651], "Ponte Vecchio": [43.7679, 11.2531], "Piazza della Repubblica Florence": [43.7715, 11.254], "Roma Termini": [41.9013, 12.5016], "Trastevere Rome": [41.8848, 12.4704], "Colosseum": [41.8902, 12.4922], "Roman Forum": [41.8921, 12.4864], "Trevi Fountain": [41.9009, 12.4833], "Piazza San Pietro": [41.9022, 12.4567], "Ponte Sant'Angelo": [41.9017, 12.4665], "Piazza Navona": [41.8992, 12.4731], "Vatican Museums": [41.9065, 12.4536], "St. Peter's Basilica": [41.9022, 12.4539], "Trattoria Da Enzo al 29 Rome": [41.8881, 12.4779], "Rome Fiumicino Airport": [41.8035, 12.2519]};
+const PLABEL = {"Rovaniemi city centre": "羅瓦涅米市區", "Santa Claus Village Rovaniemi": "聖誕老人村", "Rovaniemi Airport": "羅瓦涅米機場", "Ranua Zoo": "Ranua 動物園", "Paris Charles de Gaulle Airport": "CDG 機場", "Disneyland Park Paris": "迪士尼樂園", "Disney Adventure World Paris": "Adventure World", "La Vallée Village": "La Vallée Village", "Le Marais Paris": "瑪黑區", "Avenue Montaigne Paris": "蒙田大道", "Rue du Faubourg Saint-Honoré Paris": "聖奧諾雷市郊路", "Galeries Lafayette Haussmann": "老佛爺百貨", "Louvre Museum": "羅浮宮", "Merci 111 Boulevard Beaumarchais Paris": "Merci", "Bateaux Parisiens Port de la Bourdonnais": "遊船碼頭", "Le Jules Verne Paris": "Jules Verne（鐵塔）", "Venice Marco Polo Airport": "威尼斯機場", "Piazza San Marco Venice": "聖馬可區", "Piazza San Marco": "聖馬可廣場", "Doge's Palace Venice": "道奇宮", "Burano": "Burano", "Firenze Santa Maria Novella": "佛羅倫斯車站", "Mercato Centrale Firenze": "中央市場", "Cattedrale di Santa Maria del Fiore": "百花大教堂", "Piazzale Michelangelo": "米開朗基羅廣場", "Ponte Vecchio": "老橋", "Piazza della Repubblica Florence": "共和廣場", "Roma Termini": "Termini 車站", "Trastevere Rome": "Trastevere", "Colosseum": "鬥獸場", "Roman Forum": "古羅馬廣場", "Trevi Fountain": "特萊維噴泉", "Piazza San Pietro": "聖彼得廣場", "Ponte Sant'Angelo": "聖天使橋", "Piazza Navona": "納沃納廣場", "Vatican Museums": "梵蒂岡博物館", "St. Peter's Basilica": "聖彼得大教堂", "Trattoria Da Enzo al 29 Rome": "Da Enzo", "Rome Fiumicino Airport": "羅馬機場"};
 
 let _maps = [];
 function drawMaps(){
