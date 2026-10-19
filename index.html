@@ -264,50 +264,54 @@ const SEGMENTS = {
 
 const DAYS = [
   { seg:"lap", city:"台北 → 羅瓦涅米", short:"抵達極圈", theme:"啟程・極夜的召喚",
-    route:["Rovaniemi Airport", "Rovaniemi city centre"], rmode:"driving",
-    hops:[["Taipei Taoyuan Airport","start"],["Helsinki Airport","flight"],["Rovaniemi Airport","flight"],["Rovaniemi city centre","car"]],
+    route:["Rovaniemi Airport","Rovaniemi city centre","Jätkänkynttilä Bridge Rovaniemi"], rmode:"driving",
+    hops:[["Taipei Taoyuan Airport","start"],["Helsinki Airport","flight"],["Rovaniemi Airport","flight"],["Rovaniemi city centre","car"],["Jätkänkynttilä Bridge Rovaniemi","walk"]],
     plan:[
       {t:"前晚深夜", title:"12/18 桃園出發", desc:"台北沒有直飛芬蘭，搭夜班機到香港或東京，轉芬蘭航空飛赫爾辛基"},
       {t:"清晨", title:"赫爾辛基轉國內線", desc:"入境申根、行李直掛到羅瓦涅米；快閃 Moomin 咖啡，買極光手套"},
-      {t:"中午前後", title:"抵達羅瓦涅米", desc:"雪地接駁進市區，呼吸第一口 -15°C 的清冽"},
-      {t:"下午", title:"市區飯店 Check-in", desc:"市中心的設計旅店；補眠、市區散步", map:"Rovaniemi city centre"},
+      {t:"中午前後", title:"抵達羅瓦涅米・進市區", desc:"機場巴士或計程車約 15 分鐘，呼吸第一口 -15°C 的清冽"},
+      {t:"下午", title:"市區飯店 Check-in", desc:"市中心的設計旅店；先補眠", map:"Rovaniemi city centre"},
+      {t:"傍晚", title:"市區散步・燭光橋", desc:"下午就天黑，走去看市區聖誕燈和河上的燭光橋（Jätkänkynttilä），在市區吃第一頓北極料理", map:"Jätkänkynttilä Bridge Rovaniemi"},
     ],
     hl:[
       {tag:"氛圍", title:"極夜初體驗", desc:"下午就天黑，整個城市泡在藍調時刻裡，像水彩暈開"},
-      {tag:"住宿", title:"市區設計旅店", desc:"北歐原木＋暖光，在雪地裡像一座燈塔"},
+      {tag:"美食", title:"市區晚餐", desc:"只有今晚住市區，餐廳選擇最多，試試馴鹿肉和北極紅點鮭"},
     ],
-    tips:"轉機總共約 18–20 小時，機上就換上發熱衣、多喝水。第一天只排入住和散步，讓身體適應溫差與時差。羅瓦涅米機場很小，出關後接駁櫃檯就在門口。",
-    stay:"羅瓦涅米市區飯店", transport:"台北 → 香港/東京 → 赫爾辛基 → 羅瓦涅米（航班待訂）", temp:"-12°C ~ -18°C・白天很短" },
+    tips:"轉機總共約 18–20 小時，機上就換上發熱衣、多喝水。今晚只住市區一晚，市區光害大，極光留給後面三晚的玻璃屋。明天一早要退房，大行李今晚先整理好。",
+    stay:"羅瓦涅米市區飯店（1 晚）", transport:"台北 → 香港/東京 → 赫爾辛基 → 羅瓦涅米（航班待訂）", temp:"-12°C ~ -18°C・白天很短" },
 
-  { seg:"lap", city:"聖誕老人村・馴鹿・哈士奇", short:"聖誕老人村", theme:"童話成真・跨越北極圈",
-    route:["Rovaniemi city centre","Santa Claus Village Rovaniemi"], rmode:"driving",
+  { seg:"lap", city:"聖誕老人村・馴鹿・哈士奇 → 玻璃屋", short:"聖誕老人村", theme:"童話成真・跨越北極圈",
+    route:["Rovaniemi city centre","Santa Claus Village Rovaniemi","Rovaniemi city centre","Santa Claus Village Rovaniemi"], rmode:"driving",
+    hops:[["Rovaniemi city centre","start"],["Santa Claus Village Rovaniemi","car"],["Rovaniemi city centre","car"],["Santa Claus Village Rovaniemi","car"]],
     plan:[
-      {t:"09:30", title:"飯店接送出發", desc:"GetYourGuide 一日行程，業者到 市區飯店 接人，借你們保暖衣"},
+      {t:"08:30", title:"早餐、退房", desc:"大行李寄放在 市區飯店 櫃台"},
+      {t:"09:30", title:"飯店接送出發", desc:"GetYourGuide 一日行程，業者到飯店接人，借你們保暖衣"},
       {t:"上午", title:"馴鹿雪橇 + 哈士奇雪橇", desc:"在森林裡只聽得到鈴鐺；哈士奇起跑那一刻的爆發力，會讓人直接尖叫"},
       {t:"中午", title:"鮭魚湯午餐", desc:"芬蘭傳統鮭魚湯（有素食選項）"},
       {t:"下午", title:"跨越北極圈・聖誕老人村", desc:"手牽手跨越 66°33′；自由時間去聖誕老人郵局，寄一封給一年後的自己", map:"Santa Claus Village Rovaniemi"},
+      {t:"16:30", title:"拿行李、入住玻璃屋", desc:"業者送回市區後拿行李，搭計程車約 15 分鐘到 森林玻璃屋；第一晚玻璃屋，房內平板設定極光通知", map:"Santa Claus Village Rovaniemi"},
     ],
     hl:[
       {tag:"必訪", title:"聖誕老人辦公室", desc:"自由時間可以排隊見聖誕老人，記得說是蜜月；拍照是另外收費"},
-      {tag:"儀式", title:"北極圈線", desc:"在村裡的北極圈線拍跨越瞬間，可以加買北極圈證書"},
+      {tag:"蜜月", title:"第一晚玻璃屋", desc:"關掉所有燈，窩在羽絨被裡等綠光漫舞，記得把相機架好"},
     ],
-    tips:"行程約 6 小時，含接送、午餐和保暖衣。12 月接送時間大約在早上 9–11 點，前一天會通知。郵局明信片要寫中文＋英文地址，選聖誕期間寄出會在明年聖誕才到，超適合當週年禮。",
-    stay:"市區飯店・同一間，不用搬行李", transport:"行程業者接送", temp:"-15°C ~ -20°C・體感更冷" },
+    tips:"行程約 6 小時，含接送、午餐和保暖衣；12 月接送時間大約在早上 9–11 點，前一天會通知。訂的時候可以問業者能不能最後直接送到 森林玻璃屋，但行李在市區飯店，還是回市區拿最穩。郵局明信片要寫中文＋英文地址，選聖誕期間寄出會在明年聖誕才到。",
+    stay:"森林玻璃屋・玻璃屋景觀套房（3 晚）", transport:"行程業者接送・計程車到玻璃屋", temp:"-15°C ~ -20°C・體感更冷" },
 
-  { seg:"lap", city:"雪地摩托・換到玻璃屋", short:"雪地摩托", theme:"雪地心跳・極光玻璃屋",
-    route:["Rovaniemi city centre","Santa Claus Village Rovaniemi"], rmode:"driving",
+  { seg:"lap", city:"雪地摩托・SantaPark", short:"雪地摩托", theme:"冬至・一年最長的夜",
+    route:["Santa Claus Village Rovaniemi","SantaPark Rovaniemi"], rmode:"walking",
     plan:[
-      {t:"09:00", title:"退房、寄放行李", desc:"行李先放在 市區飯店 櫃台"},
-      {t:"上午", title:"雪地摩托 Arctic Safari", desc:"走到市中心 Arctic GM 辦公室集合，搭巴士到森林基地；2 人共騎一台，騎約 1 小時，穿越結凍的河面和森林"},
-      {t:"15:00", title:"飯店桑拿", desc:"回 市區飯店 洗桑拿暖身，勇敢的話試試在雪地裡打滾"},
-      {t:"19:00", title:"森林玻璃屋入住", desc:"拿行李搭計程車約 15 分鐘；今晚屋頂就是星空劇場", map:"Santa Claus Village Rovaniemi"},
+      {t:"09:00", title:"睡飽吃早餐", desc:"不用搬行李的早晨，在飯店餐廳慢慢吃"},
+      {t:"上午", title:"雪地摩托荒野之旅", desc:"業者直接到 森林玻璃屋 接，約 2 小時，2 人共騎一台騎約 1 小時，穿越結凍的河面和森林"},
+      {t:"14:00", title:"SantaPark（可選）", desc:"在山洞裡的聖誕主題樂園，有精靈學校和薑餅屋", map:"SantaPark Rovaniemi"},
+      {t:"晚上", title:"飯店晚餐・第二晚玻璃屋", desc:"今天是冬至，一年最長的夜，極光的時間也最長"},
     ],
     hl:[
-      {tag:"體驗", title:"雪地摩托", desc:"2025 年的新車，每團最多 5 台，導遊有急救證照"},
-      {tag:"蜜月", title:"玻璃屋極光夜", desc:"關掉所有燈，窩在羽絨被裡等綠光漫舞，記得把相機架好"},
+      {tag:"體驗", title:"雪地摩托", desc:"業者有保暖連身衣、靴子、手套、頭盔和頭套；導遊評價很高"},
+      {tag:"蜜月", title:"冬至的極光夜", desc:"不用出門，躺在玻璃屋裡等就好"},
     ],
-    tips:"雪地摩托一定要戴頭盔內的保暖頭套，否則風灌進來會頭痛；業者會借保暖連身衣。玻璃屋房內平板可以設定極光通知；強極光躺在床上就看得到，弱的要走到屋外。",
-    stay:"森林玻璃屋", transport:"步行到集合點・計程車到 玻璃屋", temp:"-18°C ~ -25°C・活動日注意保暖" },
+    tips:"雪地摩托 2 人共騎一台，想各騎一台每人加 €60。SantaPark 營業時間以官網為準。今天是最輕鬆的一天，留體力晚上等極光。",
+    stay:"森林玻璃屋・第二晚", transport:"業者接送・步行", temp:"-18°C ~ -25°C・活動日注意保暖" },
 
   { seg:"lap", city:"Ranua・最後極光狩獵", short:"北極動物園", theme:"白色王國・最後的極光",
     route:["Santa Claus Village Rovaniemi", "Ranua Zoo", "Santa Claus Village Rovaniemi"], rmode:"driving",
@@ -516,10 +520,10 @@ const DAYS = [
 /* 預訂清單：status "待訂"|"已訂"；opens = 幾天前開放預訂（不填代表現在就能訂）；where = 去哪訂；gyg = GetYourGuide 連結 {url, price, rating} */
 const BOOKINGS = [
   {item:"去程機票 台北 → 赫爾辛基 → 羅瓦涅米", day:"D1", status:"待訂", where:"芬蘭航空官網或旅行社，一張票訂到底", note:"沒有直飛，12/18 深夜出發，經香港/東京轉機"},
-  {item:"羅瓦涅米市區飯店（2 晚）", day:"D1", status:"待訂", where:"飯店官網或訂房網站"},
+  {item:"市區飯店（1 晚）", day:"D1", status:"待訂", where:"飯店官網或訂房網站", note:"問能不能 12/20 早上寄放行李"},
   {item:"聖誕老人村 + 馴鹿、哈士奇雪橇（6 小時）", day:"D2", status:"待訂", where:"GetYourGuide", gyg:{url:"https://www.getyourguide.com/rovaniemi-l2653/rovaniemi-reindeer-huskies-and-santa-claus-experience-t301148/", price:"US$211 起／人", rating:"4.6（2,417 則）"}, note:"含飯店接送、午餐、保暖衣"},
-  {item:"雪地摩托 Arctic Safari（3 小時）", day:"D3", status:"待訂", where:"GetYourGuide", gyg:{url:"https://www.getyourguide.com/rovaniemi-l2653/rovaniemi-safari-mobil-salju-barbeque-di-hutan-belantara-berpemandu-t699161/", price:"US$133 起／人", rating:"4.7（2,288 則）"}, note:"不含飯店接送，在市中心 Arctic GM 辦公室集合；2 人共騎一台"},
-  {item:"森林玻璃屋（2 晚）", day:"D3", status:"待訂", where:"飯店官網或訂房網站", note:"冬季熱門，越早越好"},
+  {item:"雪地摩托荒野之旅（2 小時）", day:"D3", status:"待訂", where:"GetYourGuide", gyg:{url:"https://www.getyourguide.com/rovaniemi-l2653/rovaniemi-guided-wilderness-snowmobile-ride-t527869/", price:"US$115 起／人", rating:"4.7（783 則）"}, note:"含 森林玻璃屋 接送和保暖裝備；2 人共騎，各騎一台每人加 €60"},
+  {item:"森林玻璃屋 玻璃屋（3 晚，12/20–12/22）", day:"D2", status:"待訂", where:"飯店官網或訂房網站", note:"聖誕週最搶，越早越好"},
   {item:"Ranua 動物園半日團（5 小時）", day:"D4", status:"待訂", where:"GetYourGuide", gyg:{url:"https://www.getyourguide.com/rovaniemi-l2653/rovaniemi-ranua-zoo-wildlife-park-tour-with-hotel-pickup-t840912/", price:"US$129 起／人", rating:"4.6（7 則，評價數少）"}, note:"含飯店接送、門票、英文導遊"},
   {item:"極光雪鞋健行（3 小時）", day:"D4", status:"待訂", where:"GetYourGuide", gyg:{url:"https://www.getyourguide.com/rovaniemi-l2653/night-snowshoeing-adventure-under-the-northern-lights-t510725/", price:"US$118 起／人", rating:"4.5（53 則）"}, note:"含接送、雪鞋和保暖衣；住離市中心 10 km 以上要加接送費，訂的時候確認 玻璃屋 算不算"},
   {item:"羅瓦涅米 → 巴黎機票", day:"D5", status:"待訂", where:"芬蘭航空官網", note:"和去程一起訂可能更便宜"},
@@ -551,8 +555,9 @@ const LEGS = [
   {day:"D1", from:"台北", to:"羅瓦涅米", mode:"飛機", how:"經香港或東京轉芬蘭航空到赫爾辛基，再轉國內線到羅瓦涅米。一張票訂到底，行李直掛。", tip:"赫爾辛基是第一個申根入境點，要做指紋和拍照的入境登記（EES），轉機時間至少留 2 小時。"},
   {day:"D1", from:"羅瓦涅米機場", to:"市區飯店（市中心）", mode:"機場巴士 / 計程車", how:"機場巴士配合航班發車，上車刷卡付約 €8；計程車約 €25–35，約 15 分鐘。", tip:"不用預約。"},
   {day:"D2", from:"市區飯店", to:"聖誕老人村、馴鹿、哈士奇", mode:"行程接送", how:"GetYourGuide 行程含飯店來回接送。", tip:"12 月接送時間約 9–11 點，前一天會通知。"},
-  {day:"D3", from:"市區飯店", to:"雪地摩托", mode:"步行 + 業者巴士", how:"走到市中心的 Arctic GM 辦公室集合，再搭業者巴士到雪地摩托基地。", tip:"早上出發前先退房，把行李寄放在櫃台。"},
-  {day:"D3", from:"市區飯店", to:"森林玻璃屋", mode:"計程車", how:"傍晚回飯店拿行李，搭計程車約 15 分鐘過去。也可以問 玻璃屋 能不能安排接送。", tip:"玻璃屋 的房間分散在森林裡，櫃台有接駁車送到房間。"},
+  {day:"D2", from:"市區飯店", to:"森林玻璃屋", mode:"計程車", how:"行程結束回市區拿行李，搭計程車約 15 分鐘過去。也可以問 玻璃屋 能不能安排接送。", tip:"玻璃屋 的房間分散在森林裡，櫃台有接駁車送到房間。"},
+  {day:"D3", from:"森林玻璃屋", to:"雪地摩托", mode:"業者接送", how:"業者直接到 森林玻璃屋 接送。", tip:""},
+  {day:"D3", from:"森林玻璃屋", to:"SantaPark", mode:"步行", how:"從玻璃屋搭計程車或走路都不遠。", tip:""},
   {day:"D4", from:"玻璃屋", to:"Ranua 動物園", mode:"旅行團", how:"參加含交通的半日團，單程約 1 小時。", tip:"冬季雪地路況差，不建議自駕。"},
   {day:"D4", from:"玻璃屋", to:"極光健行", mode:"業者接送", how:"嚮導開車接送到沒有光害的地方。", tip:"雲層厚時會開很遠，要有心理準備。"},
   {day:"D5", from:"玻璃屋", to:"羅瓦涅米機場", mode:"計程車", how:"請櫃台叫車，約 10 分鐘。", tip:""},
@@ -605,8 +610,8 @@ const GUIDES = [
 ];
 /* ======================= 資料到此為止 ======================= */
 
-const COORDS = {"Taipei Taoyuan Airport": [25.0797, 121.2342], "Helsinki Airport": [60.3172, 24.9633], "Rovaniemi Airport": [66.558, 25.8275], "Rovaniemi city centre": [66.503, 25.729], "Santa Claus Village Rovaniemi": [66.5435, 25.8476], "Ranua Zoo": [65.9434, 26.467], "Paris Charles de Gaulle Airport": [49.0079, 2.5508], "Disneyland Park Paris": [48.8711, 2.7788], "Disney Adventure World Paris": [48.8681, 2.7804], "La Vallée Village": [48.8546, 2.7838], "Le Marais Paris": [48.8612, 2.3582], "Avenue Montaigne Paris": [48.8663, 2.3045], "Rue du Faubourg Saint-Honoré Paris": [48.8695, 2.319], "Galeries Lafayette Haussmann": [48.8735, 2.332], "Louvre Museum": [48.8606, 2.3376], "Merci 111 Boulevard Beaumarchais Paris": [48.8607, 2.3668], "Bateaux Parisiens Port de la Bourdonnais": [48.8574, 2.2905], "Le Jules Verne Paris": [48.8584, 2.2945], "Venice Marco Polo Airport": [45.5047, 12.3466], "Piazza San Marco Venice": [45.4342, 12.3385], "Piazza San Marco": [45.4342, 12.3385], "Doge's Palace Venice": [45.4337, 12.3404], "Burano": [45.4854, 12.4167], "Venezia Santa Lucia": [45.4411, 12.321], "Firenze Santa Maria Novella": [43.7767, 11.2479], "Mercato Centrale Firenze": [43.7765, 11.2528], "Cattedrale di Santa Maria del Fiore": [43.7731, 11.256], "Piazzale Michelangelo": [43.7629, 11.2651], "Ponte Vecchio": [43.7679, 11.2531], "Piazza della Repubblica Florence": [43.7715, 11.254], "Roma Termini": [41.9013, 12.5016], "Trastevere Rome": [41.8848, 12.4704], "Colosseum": [41.8902, 12.4922], "Roman Forum": [41.8921, 12.4864], "Trevi Fountain": [41.9009, 12.4833], "Piazza San Pietro": [41.9022, 12.4567], "Ponte Sant'Angelo": [41.9017, 12.4665], "Piazza Navona": [41.8992, 12.4731], "Vatican Museums": [41.9065, 12.4536], "St. Peter's Basilica": [41.9022, 12.4539], "Trattoria Da Enzo al 29 Rome": [41.8881, 12.4779], "Rome Fiumicino Airport": [41.8035, 12.2519]};
-const PLABEL = {"Taipei Taoyuan Airport": "桃園機場", "Helsinki Airport": "赫爾辛基機場", "Rovaniemi city centre": "羅瓦涅米市區", "Santa Claus Village Rovaniemi": "聖誕老人村", "Rovaniemi Airport": "羅瓦涅米機場", "Ranua Zoo": "Ranua 動物園", "Paris Charles de Gaulle Airport": "CDG 機場", "Disneyland Park Paris": "迪士尼樂園", "Disney Adventure World Paris": "Adventure World", "La Vallée Village": "La Vallée Village", "Le Marais Paris": "瑪黑區", "Avenue Montaigne Paris": "蒙田大道", "Rue du Faubourg Saint-Honoré Paris": "聖奧諾雷市郊路", "Galeries Lafayette Haussmann": "老佛爺百貨", "Louvre Museum": "羅浮宮", "Merci 111 Boulevard Beaumarchais Paris": "Merci", "Bateaux Parisiens Port de la Bourdonnais": "遊船碼頭", "Le Jules Verne Paris": "Jules Verne（鐵塔）", "Venice Marco Polo Airport": "威尼斯機場", "Piazza San Marco Venice": "聖馬可區", "Piazza San Marco": "聖馬可廣場", "Doge's Palace Venice": "道奇宮", "Burano": "Burano", "Venezia Santa Lucia": "威尼斯車站", "Firenze Santa Maria Novella": "佛羅倫斯車站", "Mercato Centrale Firenze": "中央市場", "Cattedrale di Santa Maria del Fiore": "百花大教堂", "Piazzale Michelangelo": "米開朗基羅廣場", "Ponte Vecchio": "老橋", "Piazza della Repubblica Florence": "共和廣場", "Roma Termini": "Termini 車站", "Trastevere Rome": "Trastevere", "Colosseum": "鬥獸場", "Roman Forum": "古羅馬廣場", "Trevi Fountain": "特萊維噴泉", "Piazza San Pietro": "聖彼得廣場", "Ponte Sant'Angelo": "聖天使橋", "Piazza Navona": "納沃納廣場", "Vatican Museums": "梵蒂岡博物館", "St. Peter's Basilica": "聖彼得大教堂", "Trattoria Da Enzo al 29 Rome": "Da Enzo", "Rome Fiumicino Airport": "羅馬機場"};
+const COORDS = {"Taipei Taoyuan Airport": [25.0797, 121.2342], "Helsinki Airport": [60.3172, 24.9633], "Rovaniemi Airport": [66.558, 25.8275], "Rovaniemi city centre": [66.503, 25.729], "Santa Claus Village Rovaniemi": [66.5435, 25.8476], "Jätkänkynttilä Bridge Rovaniemi": [66.4981, 25.7128], "SantaPark Rovaniemi": [66.5378, 25.7985], "Ranua Zoo": [65.9434, 26.467], "Paris Charles de Gaulle Airport": [49.0079, 2.5508], "Disneyland Park Paris": [48.8711, 2.7788], "Disney Adventure World Paris": [48.8681, 2.7804], "La Vallée Village": [48.8546, 2.7838], "Le Marais Paris": [48.8612, 2.3582], "Avenue Montaigne Paris": [48.8663, 2.3045], "Rue du Faubourg Saint-Honoré Paris": [48.8695, 2.319], "Galeries Lafayette Haussmann": [48.8735, 2.332], "Louvre Museum": [48.8606, 2.3376], "Merci 111 Boulevard Beaumarchais Paris": [48.8607, 2.3668], "Bateaux Parisiens Port de la Bourdonnais": [48.8574, 2.2905], "Le Jules Verne Paris": [48.8584, 2.2945], "Venice Marco Polo Airport": [45.5047, 12.3466], "Piazza San Marco Venice": [45.4342, 12.3385], "Piazza San Marco": [45.4342, 12.3385], "Doge's Palace Venice": [45.4337, 12.3404], "Burano": [45.4854, 12.4167], "Venezia Santa Lucia": [45.4411, 12.321], "Firenze Santa Maria Novella": [43.7767, 11.2479], "Mercato Centrale Firenze": [43.7765, 11.2528], "Cattedrale di Santa Maria del Fiore": [43.7731, 11.256], "Piazzale Michelangelo": [43.7629, 11.2651], "Ponte Vecchio": [43.7679, 11.2531], "Piazza della Repubblica Florence": [43.7715, 11.254], "Roma Termini": [41.9013, 12.5016], "Trastevere Rome": [41.8848, 12.4704], "Colosseum": [41.8902, 12.4922], "Roman Forum": [41.8921, 12.4864], "Trevi Fountain": [41.9009, 12.4833], "Piazza San Pietro": [41.9022, 12.4567], "Ponte Sant'Angelo": [41.9017, 12.4665], "Piazza Navona": [41.8992, 12.4731], "Vatican Museums": [41.9065, 12.4536], "St. Peter's Basilica": [41.9022, 12.4539], "Trattoria Da Enzo al 29 Rome": [41.8881, 12.4779], "Rome Fiumicino Airport": [41.8035, 12.2519]};
+const PLABEL = {"Taipei Taoyuan Airport": "桃園機場", "Helsinki Airport": "赫爾辛基機場", "Rovaniemi city centre": "羅瓦涅米市區", "Santa Claus Village Rovaniemi": "聖誕老人村", "Jätkänkynttilä Bridge Rovaniemi": "燭光橋", "SantaPark Rovaniemi": "SantaPark", "Rovaniemi Airport": "羅瓦涅米機場", "Ranua Zoo": "Ranua 動物園", "Paris Charles de Gaulle Airport": "CDG 機場", "Disneyland Park Paris": "迪士尼樂園", "Disney Adventure World Paris": "Adventure World", "La Vallée Village": "La Vallée Village", "Le Marais Paris": "瑪黑區", "Avenue Montaigne Paris": "蒙田大道", "Rue du Faubourg Saint-Honoré Paris": "聖奧諾雷市郊路", "Galeries Lafayette Haussmann": "老佛爺百貨", "Louvre Museum": "羅浮宮", "Merci 111 Boulevard Beaumarchais Paris": "Merci", "Bateaux Parisiens Port de la Bourdonnais": "遊船碼頭", "Le Jules Verne Paris": "Jules Verne（鐵塔）", "Venice Marco Polo Airport": "威尼斯機場", "Piazza San Marco Venice": "聖馬可區", "Piazza San Marco": "聖馬可廣場", "Doge's Palace Venice": "道奇宮", "Burano": "Burano", "Venezia Santa Lucia": "威尼斯車站", "Firenze Santa Maria Novella": "佛羅倫斯車站", "Mercato Centrale Firenze": "中央市場", "Cattedrale di Santa Maria del Fiore": "百花大教堂", "Piazzale Michelangelo": "米開朗基羅廣場", "Ponte Vecchio": "老橋", "Piazza della Repubblica Florence": "共和廣場", "Roma Termini": "Termini 車站", "Trastevere Rome": "Trastevere", "Colosseum": "鬥獸場", "Roman Forum": "古羅馬廣場", "Trevi Fountain": "特萊維噴泉", "Piazza San Pietro": "聖彼得廣場", "Ponte Sant'Angelo": "聖天使橋", "Piazza Navona": "納沃納廣場", "Vatican Museums": "梵蒂岡博物館", "St. Peter's Basilica": "聖彼得大教堂", "Trattoria Da Enzo al 29 Rome": "Da Enzo", "Rome Fiumicino Airport": "羅馬機場"};
 
 let _maps = [];
 function drawMaps(){
