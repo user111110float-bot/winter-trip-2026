@@ -645,11 +645,19 @@ function drawMaps(){
         arrow(L.point(pa.x + (pb.x - pa.x) * 0.42, pa.y + (pb.y - pa.y) * 0.42), ang(pa, pb), how === 'train');
       }
     }
+    // one pin per stop; stops at the same place are spread side by side (pixel offset) so each number shows
+    const groupsAt = new Map();
+    seq.forEach((s, i) => { const k = s.ll.join(','); if (!groupsAt.has(k)) groupsAt.set(k, []); groupsAt.get(k).push(i); });
     const first = new Map();
-    seq.forEach((s, i) => { const k = s.ll.join(','); if (!first.has(k)) first.set(k, {s, nums:[i + 1]}); else first.get(k).nums.push(i + 1); });
-    first.forEach(({s, nums}) => {
-      const icon = L.divIcon({className:'pin', html:`<span style="background:${color}">${nums[0]}</span>`, iconSize:[24,24], iconAnchor:[12,12]});
-      L.marker(s.ll, {icon}).addTo(m).bindTooltip(nums.length > 1 ? `${s.name}（第 ${nums.join('、')} 站）` : s.name, {direction:'top', offset:[0,-10]});
+    groupsAt.forEach((idxs, k) => {
+      const s0 = seq[idxs[0]];
+      first.set(k, {s:s0});
+      if (idxs.length > 1) L.circleMarker(s0.ll, {radius:3, color, weight:1, fillColor:color, fillOpacity:1, interactive:false}).addTo(m);
+      idxs.forEach((i, j) => {
+        const dx = idxs.length > 1 ? (j - (idxs.length - 1) / 2) * 26 : 0, dy = idxs.length > 1 ? -14 : 0;
+        const icon = L.divIcon({className:'pin', html:`<span style="background:${color}">${i + 1}</span>`, iconSize:[24,24], iconAnchor:[12 - dx, 12 - dy]});
+        L.marker(seq[i].ll, {icon, zIndexOffset: 100 + j}).addTo(m).bindTooltip(`${i + 1}. ${seq[i].name}`, {direction:'top', offset:[dx, dy - 10]});
+      });
     });
     const ll = [...first.values()].map(v => v.s.ll);
     if (ll.length === 1) m.setView(ll[0], 14); else m.fitBounds(ll, {padding:[34,34]});
