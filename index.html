@@ -816,7 +816,7 @@ async function removeFile(id, fid){
   await new Promise(r => setTimeout(r, 0)); // let the rest of the script define render() first
   const c = window.claude;
   const db = c && c.use ? await c.use("db") : null;
-  if (!db) { loadLocal(); canTick = true; tickWhere = "勾選只記在這台裝置的瀏覽器"; updateCount(); render(); return; }
+  if (!db) { canTick = false; tickWhere = "這裡不能勾選，勾選和最新的預訂狀態請看 Claude 上的完整版"; updateCount(); render(); return; }
   DB = db;
   const user = await c.use("user");
   const w = user ? await user.can("data.write") : null;
