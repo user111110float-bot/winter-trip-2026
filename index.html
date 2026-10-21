@@ -16,17 +16,17 @@
   --bg:#F3F5F7; --surface:#FFFFFF; --ink:#18212E; --muted:#5D6878; --line:#DCE1E8; --soft:#E9EDF2;
   --accent:#18212E;
   --lap:#2F6DB0; --par:#A23E6A; --ven:#16807C; --flo:#A9741A; --rom:#B4472E;
-  --ok:#2E7D4F; --warn:#9A6B00; --gyg:#D9480F;
+  --ok:#2E7D4F; --warn:#9A6B00; --gyg:#D9480F; --bad:#C0392B;
   --f-display:"LXGW WenKai TC","Noto Serif TC",serif;
   --f-body:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
   --f-mono:"JetBrains Mono",ui-monospace,"SFMono-Regular",monospace;
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
   --bg:#10151D; --surface:#18202B; --ink:#E8ECF2; --muted:#98A3B3; --line:#2A3443; --soft:#202A37; --accent:#E8ECF2;
-  --lap:#7FB0E6; --par:#E386AE; --ven:#5CC7C1; --flo:#E2B25E; --rom:#EE8C72; --ok:#6CC892; --warn:#E3B84F; --gyg:#FF8A5B; color-scheme:dark}}
+  --lap:#7FB0E6; --par:#E386AE; --ven:#5CC7C1; --flo:#E2B25E; --rom:#EE8C72; --ok:#6CC892; --warn:#E3B84F; --gyg:#FF8A5B; --bad:#F07B6E; color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#10151D; --surface:#18202B; --ink:#E8ECF2; --muted:#98A3B3; --line:#2A3443; --soft:#202A37; --accent:#E8ECF2;
-  --lap:#7FB0E6; --par:#E386AE; --ven:#5CC7C1; --flo:#E2B25E; --rom:#EE8C72; --ok:#6CC892; --warn:#E3B84F; --gyg:#FF8A5B; color-scheme:dark}
+  --lap:#7FB0E6; --par:#E386AE; --ven:#5CC7C1; --flo:#E2B25E; --rom:#EE8C72; --ok:#6CC892; --warn:#E3B84F; --gyg:#FF8A5B; --bad:#F07B6E; color-scheme:dark}
 
 *{box-sizing:border-box}
 [hidden]{display:none!important}
@@ -151,6 +151,24 @@ ol.plan li:first-child{border-top:0}
 .note{color:var(--muted);font-size:13px;margin-top:12px}
 .lead{color:var(--muted);font-size:14px;margin:0 0 18px}
 .st.wait-s{color:var(--muted);background:var(--soft)}
+.tick{display:flex;flex-direction:column;align-items:center;gap:4px;min-width:52px;padding:2px 0;border-radius:8px}
+.tick .box{width:22px;height:22px;border-radius:6px;border:2px solid var(--muted);background:var(--surface);display:flex;align-items:center;justify-content:center}
+.tick.on-done .box{background:var(--ok);border-color:var(--ok)}
+.tick.on-done .box::after{content:"";width:6px;height:11px;border:solid var(--surface);border-width:0 2.5px 2.5px 0;transform:rotate(45deg) translate(-1px,-1px)}
+.tick:not(:disabled):hover .box{border-color:var(--ok)}
+.tick:disabled{cursor:default;opacity:.85}
+.tick em{font-style:normal;font-weight:400;margin-left:4px;font-family:var(--f-mono);font-size:10.5px}
+.files{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:8px}
+.file{position:relative;display:inline-flex;align-items:center}
+.file img{width:56px;height:56px;object-fit:cover;border-radius:8px;border:1px solid var(--line);display:block;background:var(--soft)}
+.file .pdf{display:inline-block;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;padding:5px 10px;border-radius:8px;border:1px solid var(--line);background:var(--soft);text-decoration:none}
+.fdel{position:absolute;top:-6px;right:-6px;min-width:20px;height:20px;padding:0 5px;border-radius:999px;background:var(--ink);color:var(--surface);font-size:12px;line-height:20px}
+.fdel.armed{background:var(--bad);color:var(--surface);white-space:nowrap}
+.up{display:inline-flex;align-items:center;font-size:12.5px;padding:5px 10px;border-radius:8px;border:1px dashed var(--muted);color:var(--muted);cursor:pointer}
+.up:hover{border-color:var(--ok);color:var(--ok)}
+.up input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+.upmsg{flex-basis:100%;font-size:12px;color:var(--bad)}
+.todo.is-done .itm{text-decoration:line-through;text-decoration-color:color-mix(in srgb,var(--muted) 60%,transparent);color:var(--muted)}
 .gyg{display:inline-flex;flex-wrap:wrap;align-items:baseline;gap:4px 8px;margin-top:6px;padding:4px 12px;border-radius:999px;border:1px solid var(--gyg);color:var(--gyg);text-decoration:none;font-size:13px;font-weight:700}
 .gyg span{font-weight:400;font-size:12px;color:var(--muted)}
 .gyg:hover{background:color-mix(in srgb,var(--gyg) 10%,transparent)}
@@ -518,37 +536,37 @@ const DAYS = [
     stay:"機上", transport:"計程車 + 華航直飛（待訂，班表以訂票時為準）", temp:"台北 19°C・回家了" },
 ];
 
-/* 預訂清單：status "待訂"|"已訂"；opens = 幾天前開放預訂（不填代表現在就能訂）；where = 去哪訂；gyg = GetYourGuide 連結 {url, price, rating} */
+/* 預訂清單：id 固定不要改（勾選紀錄靠它對應）；status "待訂"|"已訂"（頁面上勾選的會蓋過這裡）；opens = 幾天前開放預訂（不填代表現在就能訂）；where = 去哪訂；gyg = GetYourGuide 連結 {url, price, rating} */
 const BOOKINGS = [
-  {item:"去程機票 台北 → 赫爾辛基 → 羅瓦涅米", day:"D1", status:"待訂", where:"芬蘭航空官網或旅行社，一張票訂到底", note:"沒有直飛，12/18 深夜出發，經香港/東京轉機"},
-  {item:"市區飯店（1 晚）", day:"D1", status:"待訂", where:"飯店官網或訂房網站", note:"12/20 早上 7:30 退房、8:00 叫車"},
-  {item:"聖誕老人村 + 馴鹿、哈士奇雪橇（6 小時）", day:"D2", status:"待訂", where:"GetYourGuide", gyg:{url:"https://www.getyourguide.com/rovaniemi-l2653/rovaniemi-reindeer-huskies-and-santa-claus-experience-t301148/", price:"US$211 起／人", rating:"4.6（2,417 則）"}, note:"含接送、午餐、保暖衣；接送地點填 森林玻璃屋，並確認結束也送回玻璃屋"},
-  {item:"雪地摩托荒野之旅（2 小時）", day:"D3", status:"待訂", where:"GetYourGuide", gyg:{url:"https://www.getyourguide.com/rovaniemi-l2653/rovaniemi-guided-wilderness-snowmobile-ride-t527869/", price:"US$115 起／人", rating:"4.7（783 則）"}, note:"含 森林玻璃屋 接送和保暖裝備；2 人共騎，各騎一台每人加 €60"},
-  {item:"森林玻璃屋 玻璃屋（3 晚，12/20–12/22）", day:"D2", status:"待訂", where:"飯店官網或訂房網站", note:"聖誕週最搶，越早越好；確認 12/20 早上 8 點可以先寄放行李"},
-  {item:"Ranua 動物園半日團（5 小時）", day:"D4", status:"待訂", where:"GetYourGuide", gyg:{url:"https://www.getyourguide.com/rovaniemi-l2653/rovaniemi-ranua-zoo-wildlife-park-tour-with-hotel-pickup-t840912/", price:"US$129 起／人", rating:"4.6（7 則，評價數少）"}, note:"含飯店接送、門票、英文導遊"},
-  {item:"極光雪鞋健行（3 小時）", day:"D4", status:"待訂", where:"GetYourGuide", gyg:{url:"https://www.getyourguide.com/rovaniemi-l2653/night-snowshoeing-adventure-under-the-northern-lights-t510725/", price:"US$118 起／人", rating:"4.5（53 則）"}, note:"含接送、雪鞋和保暖衣；住離市中心 10 km 以上要加接送費，訂的時候確認 玻璃屋 算不算"},
-  {item:"羅瓦涅米 → 巴黎機票", day:"D5", status:"待訂", where:"芬蘭航空官網", note:"和去程一起訂可能更便宜"},
-  {item:"迪士尼園區飯店（3 晚）+ 樂園門票", day:"D5", status:"待訂", where:"迪士尼官網，訂房加門票套裝", note:"聖誕週最貴也最搶"},
-  {item:"平安夜 Royal Banquet 晚餐", day:"D6", status:"待訂", where:"迪士尼 App 或官網", opens:60, note:"現場幾乎全滿"},
-  {item:"瑪黑公寓（12/26–27，2 晚）", day:"D8", status:"待訂", where:"訂房網站", note:"確認入住時間可以晚到"},
-  {item:"羅浮宮時段票", day:"D9", status:"待訂", where:"ticket.louvre.fr", opens:120, note:"非歐盟 €32；週二休館"},
-  {item:"Le Jules Verne 晚餐", day:"D9", status:"待訂", where:"Jules Verne 官網", opens:90, note:"品嚐菜單約 €295 起；男士要穿西裝外套"},
-  {item:"塞納河遊船（1 小時）", day:"D9", status:"待訂", where:"GetYourGuide", gyg:{url:"https://www.getyourguide.com/paris-l16/paris-sightseeing-river-cruise-t15928/", price:"US$20 起／人", rating:"4.3（2,944 則）"}, note:"鐵塔旁 Port de Suffren 上船，平均 45 分鐘一班"},
-  {item:"巴黎 → 威尼斯機票", day:"D10", status:"待訂", where:"法航或其他航空官網"},
-  {item:"威尼斯飯店（2 晚）+ 機場水上計程車", day:"D10", status:"待訂", where:"飯店官網；水上計程車可請飯店代訂", note:"先問清楚水上計程車價錢"},
-  {item:"聖馬可大教堂 + 道奇宮 + 嘆息橋", day:"D11", status:"待訂", where:"GetYourGuide", gyg:{url:"https://www.getyourguide.com/venice-l35/venice-st-mark-s-basilica-doge-s-palace-bridge-of-sighs-t927092/", price:"US$47 起／人", rating:"4.1（5,161 則）"}, note:"可選語音導覽或真人導覽；聖馬可 9:30 才開門"},
-  {item:"貢多拉（可選）", day:"D11", status:"待訂", where:"GetYourGuide 或現場", gyg:{url:"https://www.getyourguide.com/venice-l35/gondola-tours-tc264/", price:"看方案", rating:""}, note:"共享船比較便宜；現場包船白天 30 分鐘 €90"},
-  {item:"高鐵 威尼斯 → 佛羅倫斯", day:"D12", status:"待訂", where:"trenitalia.com 或 italotreno.com", opens:120, note:"越早越便宜"},
-  {item:"百花大教堂圓頂登頂", day:"D12", status:"待訂", where:"GetYourGuide 或官網", gyg:{url:"https://www.getyourguide.com/florence-l32/brunelleschi-s-dome-florence-duomo-cathedral-entry-ticket-t867225/", price:"US$80 起／人", rating:"4.5（100 則）"}, note:"GetYourGuide 含圓頂時段＋3 日通行證；官網 €30 只含圓頂。選 15:00 前的時段"},
-  {item:"佛羅倫斯飯店（1 晚）", day:"D12", status:"待訂", where:"飯店官網或訂房網站"},
-  {item:"高鐵 佛羅倫斯 → 羅馬（08:30 左右）", day:"D13", status:"待訂", where:"trenitalia.com 或 italotreno.com", opens:120},
-  {item:"Trastevere 公寓（3 晚）", day:"D13", status:"待訂", where:"訂房網站", note:"問房東能不能 11 點先寄放行李"},
-  {item:"鬥獸場地下層門票（12/31 中午）", day:"D13", status:"待訂", where:"官網優先，搶不到再用 GetYourGuide", gyg:{url:"https://www.getyourguide.com/colosseum-underground-l90536/", price:"看方案", rating:""}, note:"官網 €24 最便宜；記名制，入場要帶證件"},
-  {item:"跨年夜晚餐 20:00", day:"D13", status:"待訂", where:"餐廳官網或 TheFork"},
-  {item:"1/1 新年午餐", day:"D14", status:"待訂", where:"餐廳官網或 TheFork", note:"很多餐廳 1/1 關門"},
-  {item:"梵蒂岡早場導覽（博物館＋西斯汀＋聖彼得）", day:"D15", status:"待訂", where:"GetYourGuide", gyg:{url:"https://www.getyourguide.com/rome-l33/vatican-early-entry-to-museums-sistine-chapel-st-peter-s-t50951/", price:"US$122 起／人", rating:"4.9（3,578 則）"}, note:"3–3.5 小時，從西斯汀直接走進聖彼得大教堂；只買門票可上官網約 €25"},
-  {item:"聖彼得大教堂圓頂", day:"D15", status:"待訂", where:"官網或 GetYourGuide", gyg:{url:"https://www.getyourguide.com/rome-l33/rome-st-peter-s-basilica-w-climb-to-the-dome-crypt-t78613/", price:"US$53 起／人", rating:"4.6（1,605 則）"}, note:"官網約 €22（含電梯）；GetYourGuide 版本含導遊"},
-  {item:"回程機票 羅馬 → 台北", day:"D16", status:"待訂", where:"華航官網", note:"直飛只有週三、週日，1/3 剛好是週日"},
+  {id:"flight-out", item:"去程機票 台北 → 赫爾辛基 → 羅瓦涅米", day:"D1", status:"待訂", where:"芬蘭航空官網或旅行社，一張票訂到底", note:"沒有直飛，12/18 深夜出發，經香港/東京轉機"},
+  {id:"hotel-city", item:"市區飯店（1 晚）", day:"D1", status:"待訂", where:"飯店官網或訂房網站", note:"12/20 早上 7:30 退房、8:00 叫車"},
+  {id:"tour-santa", item:"聖誕老人村 + 馴鹿、哈士奇雪橇（6 小時）", day:"D2", status:"待訂", where:"GetYourGuide", gyg:{url:"https://www.getyourguide.com/rovaniemi-l2653/rovaniemi-reindeer-huskies-and-santa-claus-experience-t301148/", price:"US$211 起／人", rating:"4.6（2,417 則）"}, note:"含接送、午餐、保暖衣；接送地點填 森林玻璃屋，並確認結束也送回玻璃屋"},
+  {id:"tour-snowmobile", item:"雪地摩托荒野之旅（2 小時）", day:"D3", status:"待訂", where:"GetYourGuide", gyg:{url:"https://www.getyourguide.com/rovaniemi-l2653/rovaniemi-guided-wilderness-snowmobile-ride-t527869/", price:"US$115 起／人", rating:"4.7（783 則）"}, note:"含 森林玻璃屋 接送和保暖裝備；2 人共騎，各騎一台每人加 €60"},
+  {id:"hotel-igloo", item:"森林玻璃屋 玻璃屋（3 晚，12/20–12/22）", day:"D2", status:"待訂", where:"飯店官網或訂房網站", note:"聖誕週最搶，越早越好；確認 12/20 早上 8 點可以先寄放行李"},
+  {id:"tour-ranua", item:"Ranua 動物園半日團（5 小時）", day:"D4", status:"待訂", where:"GetYourGuide", gyg:{url:"https://www.getyourguide.com/rovaniemi-l2653/rovaniemi-ranua-zoo-wildlife-park-tour-with-hotel-pickup-t840912/", price:"US$129 起／人", rating:"4.6（7 則，評價數少）"}, note:"含飯店接送、門票、英文導遊"},
+  {id:"tour-aurora", item:"極光雪鞋健行（3 小時）", day:"D4", status:"待訂", where:"GetYourGuide", gyg:{url:"https://www.getyourguide.com/rovaniemi-l2653/night-snowshoeing-adventure-under-the-northern-lights-t510725/", price:"US$118 起／人", rating:"4.5（53 則）"}, note:"含接送、雪鞋和保暖衣；住離市中心 10 km 以上要加接送費，訂的時候確認 玻璃屋 算不算"},
+  {id:"flight-rvn-cdg", item:"羅瓦涅米 → 巴黎機票", day:"D5", status:"待訂", where:"芬蘭航空官網", note:"和去程一起訂可能更便宜"},
+  {id:"hotel-disney", item:"迪士尼園區飯店（3 晚）+ 樂園門票", day:"D5", status:"待訂", where:"迪士尼官網，訂房加門票套裝", note:"聖誕週最貴也最搶"},
+  {id:"dinner-xmas-eve", item:"平安夜 Royal Banquet 晚餐", day:"D6", status:"待訂", where:"迪士尼 App 或官網", opens:60, note:"現場幾乎全滿"},
+  {id:"apt-marais", item:"瑪黑公寓（12/26–27，2 晚）", day:"D8", status:"待訂", where:"訂房網站", note:"確認入住時間可以晚到"},
+  {id:"louvre", item:"羅浮宮時段票", day:"D9", status:"待訂", where:"ticket.louvre.fr", opens:120, note:"非歐盟 €32；週二休館"},
+  {id:"jules-verne", item:"Le Jules Verne 晚餐", day:"D9", status:"待訂", where:"Jules Verne 官網", opens:90, note:"品嚐菜單約 €295 起；男士要穿西裝外套"},
+  {id:"seine-cruise", item:"塞納河遊船（1 小時）", day:"D9", status:"待訂", where:"GetYourGuide", gyg:{url:"https://www.getyourguide.com/paris-l16/paris-sightseeing-river-cruise-t15928/", price:"US$20 起／人", rating:"4.3（2,944 則）"}, note:"鐵塔旁 Port de Suffren 上船，平均 45 分鐘一班"},
+  {id:"flight-cdg-vce", item:"巴黎 → 威尼斯機票", day:"D10", status:"待訂", where:"法航或其他航空官網"},
+  {id:"hotel-venice", item:"威尼斯飯店（2 晚）+ 機場水上計程車", day:"D10", status:"待訂", where:"飯店官網；水上計程車可請飯店代訂", note:"先問清楚水上計程車價錢"},
+  {id:"venice-sanmarco", item:"聖馬可大教堂 + 道奇宮 + 嘆息橋", day:"D11", status:"待訂", where:"GetYourGuide", gyg:{url:"https://www.getyourguide.com/venice-l35/venice-st-mark-s-basilica-doge-s-palace-bridge-of-sighs-t927092/", price:"US$47 起／人", rating:"4.1（5,161 則）"}, note:"可選語音導覽或真人導覽；聖馬可 9:30 才開門"},
+  {id:"gondola", item:"貢多拉（可選）", day:"D11", status:"待訂", where:"GetYourGuide 或現場", gyg:{url:"https://www.getyourguide.com/venice-l35/gondola-tours-tc264/", price:"看方案", rating:""}, note:"共享船比較便宜；現場包船白天 30 分鐘 €90"},
+  {id:"train-vce-flr", item:"高鐵 威尼斯 → 佛羅倫斯", day:"D12", status:"待訂", where:"trenitalia.com 或 italotreno.com", opens:120, note:"越早越便宜"},
+  {id:"duomo-dome", item:"百花大教堂圓頂登頂", day:"D12", status:"待訂", where:"GetYourGuide 或官網", gyg:{url:"https://www.getyourguide.com/florence-l32/brunelleschi-s-dome-florence-duomo-cathedral-entry-ticket-t867225/", price:"US$80 起／人", rating:"4.5（100 則）"}, note:"GetYourGuide 含圓頂時段＋3 日通行證；官網 €30 只含圓頂。選 15:00 前的時段"},
+  {id:"hotel-florence", item:"佛羅倫斯飯店（1 晚）", day:"D12", status:"待訂", where:"飯店官網或訂房網站"},
+  {id:"train-flr-rome", item:"高鐵 佛羅倫斯 → 羅馬（08:30 左右）", day:"D13", status:"待訂", where:"trenitalia.com 或 italotreno.com", opens:120},
+  {id:"apt-rome", item:"Trastevere 公寓（3 晚）", day:"D13", status:"待訂", where:"訂房網站", note:"問房東能不能 11 點先寄放行李"},
+  {id:"colosseum", item:"鬥獸場地下層門票（12/31 中午）", day:"D13", status:"待訂", where:"官網優先，搶不到再用 GetYourGuide", gyg:{url:"https://www.getyourguide.com/colosseum-underground-l90536/", price:"看方案", rating:""}, note:"官網 €24 最便宜；記名制，入場要帶證件"},
+  {id:"dinner-nye", item:"跨年夜晚餐 20:00", day:"D13", status:"待訂", where:"餐廳官網或 TheFork"},
+  {id:"lunch-newyear", item:"1/1 新年午餐", day:"D14", status:"待訂", where:"餐廳官網或 TheFork", note:"很多餐廳 1/1 關門"},
+  {id:"vatican-tour", item:"梵蒂岡早場導覽（博物館＋西斯汀＋聖彼得）", day:"D15", status:"待訂", where:"GetYourGuide", gyg:{url:"https://www.getyourguide.com/rome-l33/vatican-early-entry-to-museums-sistine-chapel-st-peter-s-t50951/", price:"US$122 起／人", rating:"4.9（3,578 則）"}, note:"3–3.5 小時，從西斯汀直接走進聖彼得大教堂；只買門票可上官網約 €25"},
+  {id:"stpeter-dome", item:"聖彼得大教堂圓頂", day:"D15", status:"待訂", where:"官網或 GetYourGuide", gyg:{url:"https://www.getyourguide.com/rome-l33/rome-st-peter-s-basilica-w-climb-to-the-dome-crypt-t78613/", price:"US$53 起／人", rating:"4.6（1,605 則）"}, note:"官網約 €22（含電梯）；GetYourGuide 版本含導遊"},
+  {id:"flight-home", item:"回程機票 羅馬 → 台北", day:"D16", status:"待訂", where:"華航官網", note:"直飛只有週三、週日，1/3 剛好是週日"},
 ];
 
 /* 交通：每一段怎麼移動。mode 是交通方式，tip 是要注意的地方 */
@@ -726,8 +744,77 @@ document.getElementById("tripSub").textContent = `${DAYS[0].date}（${DAYS[0].wk
 })();
 document.getElementById("segbar").innerHTML = groups.map(g => `<span style="--c:${COLORS[g.seg]};flex:${g.days.length}" title="${esc(SEGMENTS[g.seg].name)}"></span>`).join("");
 document.getElementById("seglegend").innerHTML = groups.map(g => `<span style="--c:${COLORS[g.seg]}"><i></i>${esc(SEGMENTS[g.seg].name)} ${g.days[0].date}–${g.days[g.days.length-1].date}</span>`).join("");
-const pending = BOOKINGS.filter(b => b.status !== "已訂").length;
-document.getElementById("bkCount").textContent = pending ? pending : "✓";
+// booked state: shared db (artifact) or this browser (fallback); overrides the static status
+const BOOKED = {}; // id -> {done, at, files:[{id,name,type,size}]}
+let ASSETS = null; const UPLOADING = {}; const ARMED = {};
+let canTick = false, tickWhere = "";
+const isDone = b => BOOKED[b.id] ? !!BOOKED[b.id].done : b.status === "已訂";
+const pendingCount = () => BOOKINGS.filter(b => !isDone(b)).length;
+function updateCount(){ const n = pendingCount(); document.getElementById("bkCount").textContent = n ? n : "✓"; }
+updateCount();
+let DB = null;
+const LS_KEY = "hm-booked";
+function loadLocal(){ try { Object.assign(BOOKED, JSON.parse(localStorage.getItem(LS_KEY) || "{}")); } catch(e){} }
+function saveLocal(){ try { localStorage.setItem(LS_KEY, JSON.stringify(BOOKED)); } catch(e){} }
+async function toggleBooked(id){
+  const b = BOOKINGS.find(x => x.id === id); if (!b || !canTick) return;
+  const next = Object.assign({}, BOOKED[id] || {}, {done: !isDone(b), at: new Date().toISOString()});
+  await saveBooking(id, next);
+}
+async function saveBooking(id, next){
+  BOOKED[id] = next; updateCount(); render();
+  if (DB) {
+    try { await DB.doc("bookings/" + id).set(next); }
+    catch(e){ if (e && e.code === "invalid_argument") { canTick = false; tickWhere = "你目前只有檢視權限，不能勾選"; render(); } }
+  } else saveLocal();
+}
+const OKTYPES = ["image/png","image/jpeg","image/gif","image/webp","application/pdf"];
+const upMsg = {};
+async function uploadFiles(id, fileList){
+  if (!ASSETS || !DB) return;
+  const files = [...fileList]; if (!files.length) return;
+  UPLOADING[id] = true; upMsg[id] = ""; render();
+  const cur = Object.assign({files:[]}, BOOKED[id] || {});
+  const added = [];
+  for (const f of files) {
+    let type = f.type;
+    if (!type) { const ext = (f.name.split(".").pop() || "").toLowerCase(); type = {pdf:"application/pdf",png:"image/png",jpg:"image/jpeg",jpeg:"image/jpeg",gif:"image/gif",webp:"image/webp"}[ext] || ""; }
+    if (!OKTYPES.includes(type)) { upMsg[id] = `「${f.name}」格式不支援，請上傳 JPG、PNG、WebP、GIF 或 PDF（iPhone 的 HEIC 照片請先轉成 JPG 或截圖）`; continue; }
+    if (f.size > 20 * 1024 * 1024) { upMsg[id] = `「${f.name}」超過 20 MB，請壓縮後再上傳`; continue; }
+    try { const r = await ASSETS.upload(f, {type}); added.push({id:r.id, name:f.name, type, size:r.sizeBytes}); }
+    catch(e) { upMsg[id] = e && e.code === "quota_or_state" ? "空間已滿，請先刪掉不需要的附件" : e && e.code === "rate_limited" ? "上傳太頻繁，請稍後再試" : `「${f.name}」上傳失敗，請再試一次`; }
+  }
+  UPLOADING[id] = false;
+  if (added.length) {
+    const next = Object.assign({}, cur, {files: (cur.files || []).concat(added)});
+    if (!isDone(BOOKINGS.find(x => x.id === id) || {})) { next.done = true; next.at = new Date().toISOString(); }
+    await saveBooking(id, next);
+  } else render();
+}
+async function removeFile(id, fid){
+  if (!ASSETS || !DB) return;
+  if (ARMED[id + fid] !== true) { ARMED[id + fid] = true; render(); setTimeout(() => { if (ARMED[id + fid]) { delete ARMED[id + fid]; render(); } }, 4000); return; }
+  delete ARMED[id + fid];
+  const cur = Object.assign({files:[]}, BOOKED[id] || {});
+  await saveBooking(id, Object.assign({}, cur, {files: (cur.files || []).filter(f => f.id !== fid)}));
+  try { await ASSETS.delete(fid); } catch(e) {}
+}
+(async () => {
+  await new Promise(r => setTimeout(r, 0)); // let the rest of the script define render() first
+  const c = window.claude;
+  const db = c && c.use ? await c.use("db") : null;
+  if (!db) { loadLocal(); canTick = true; tickWhere = "勾選只記在這台裝置的瀏覽器"; updateCount(); render(); return; }
+  DB = db;
+  const user = await c.use("user");
+  const w = user ? await user.can("data.write") : null;
+  canTick = w !== false; tickWhere = canTick ? "勾選會同步給所有能編輯的人" : "你目前只有檢視權限，不能勾選";
+  ASSETS = await c.use("assets");
+  db.collection("bookings").onSnapshot(snap => {
+    snap.docs.forEach(d => { const v = d.data(); if (v) BOOKED[d.id] = {done: !!v.done, at: v.at, files: Array.isArray(v.files) ? v.files : []}; });
+    updateCount(); render();
+  }, () => {});
+  render();
+})();
 
 const dayById = id => DAYS.find(d => d.id === id);
 const TODAY = (() => { const n = new Date(); return new Date(n.getFullYear(), n.getMonth(), n.getDate()); })();
@@ -740,12 +827,20 @@ function opensInfo(b){
   return {open, at:o.getTime(), label: open ? "已開放預訂" : `${o.getMonth() + 1}/${o.getDate()} 開放預訂`};
 }
 function todoRow(b, showDay){
-  const d = dayById(b.day); const done = b.status === "已訂"; const oi = opensInfo(b);
+  const d = dayById(b.day); const done = isDone(b); const oi = opensInfo(b);
   const dayBtn = showDay && d ? `<button class="on" data-go="${d.i}" style="--c:${d.c};color:${d.c}">${d.id} · ${d.date}</button>` : "";
-  const st = done ? `<span class="st done-s">已訂</span>` : oi.open ? `<span class="st todo-s">待訂</span>` : `<span class="st wait-s">未開放</span>`;
+  const at = done && BOOKED[b.id] && BOOKED[b.id].at ? new Date(BOOKED[b.id].at) : null;
+  const label = done ? "已訂" + (at ? `<em>${at.getMonth() + 1}/${at.getDate()}</em>` : "") : oi.open ? "待訂" : "未開放";
+  const st = `<button class="tick ${done ? "on-done" : ""}" data-tick="${esc(b.id)}" role="checkbox" aria-checked="${done}" ${canTick ? "" : "disabled"} aria-label="${esc(b.item)}：${done ? "已訂" : "未訂"}"><span class="box"></span><span class="st ${done ? "done-s" : oi.open ? "todo-s" : "wait-s"}">${label}</span></button>`;
   const meta = [b.where ? `去哪訂：${esc(b.where)}` : "", !done && oi.label ? `<b class="${oi.open ? "" : "soon"}">${oi.label}</b>` : "", b.note ? esc(b.note) : ""].filter(Boolean).join("　");
   const gyg = b.gyg ? `<a class="gyg" href="${esc(b.gyg.url)}" target="_blank" rel="noopener">在 GetYourGuide 購買<span>${esc(b.gyg.price)}${b.gyg.rating ? "・★ " + esc(b.gyg.rating) : ""}</span></a>` : "";
-  return `<div class="todo">${st}<div>${esc(b.item)}${meta ? `<small>${meta}</small>` : ""}${gyg}</div>${dayBtn}</div>`;
+  const fl = (BOOKED[b.id] && BOOKED[b.id].files) || [];
+  const files = fl.length || (ASSETS && DB) ? `<div class="files">${fl.map(f => {
+      const u = "/_blob/" + f.id; const img = /^image\//.test(f.type);
+      const del = ASSETS ? `<button class="fdel ${ARMED[b.id + f.id] ? "armed" : ""}" data-fdel="${esc(b.id)}|${esc(f.id)}" aria-label="刪除 ${esc(f.name)}">${ARMED[b.id + f.id] ? "確定刪除？" : "×"}</button>` : "";
+      return `<span class="file">${img ? `<a href="${u}" target="_blank" rel="noopener"><img src="${u}" alt="${esc(f.name)}" loading="lazy"></a>` : `<a class="pdf" href="${u}" target="_blank" rel="noopener">PDF・${esc(f.name)}</a>`}${del}</span>`;
+    }).join("")}${ASSETS && DB ? `<label class="up">${UPLOADING[b.id] ? "上傳中…" : "＋ 上傳確認信／票券"}<input type="file" accept="image/png,image/jpeg,image/gif,image/webp,application/pdf" multiple data-up="${esc(b.id)}" ${UPLOADING[b.id] ? "disabled" : ""}></label>` : ""}${upMsg[b.id] ? `<span class="upmsg">${esc(upMsg[b.id])}</span>` : ""}</div>` : "";
+  return `<div class="todo ${done ? "is-done" : ""}">${st}<div><span class="itm">${esc(b.item)}</span>${meta ? `<small>${meta}</small>` : ""}${gyg}${files}</div>${dayBtn}</div>`;
 }
 function legRow(l, showDay){
   const d = dayById(l.day);
@@ -821,15 +916,15 @@ function renderTr(){
 }
 
 function renderBk(){
-  const done = BOOKINGS.length - pending;
-  const rank = b => b.status === "已訂" ? 2 : opensInfo(b).open ? 0 : 1;
+  const done = BOOKINGS.length - pendingCount();
+  const rank = b => isDone(b) ? 2 : opensInfo(b).open ? 0 : 1;
   const sorted = BOOKINGS.slice().sort((a, b) => rank(a) - rank(b) || (rank(a) === 1 ? opensInfo(a).at - opensInfo(b).at : 0) || (+a.day.slice(1)) - (+b.day.slice(1)));
   const nowOpen = BOOKINGS.filter(b => rank(b) === 0).length;
   return `<div class="bk">
   <div class="sec-t" style="margin-top:4px">要預訂的 ${BOOKINGS.length} 項</div>
   <div class="prog"><span>${done} / ${BOOKINGS.length} 已訂・${nowOpen} 項現在就能訂</span><div class="bar"><span style="width:${BOOKINGS.length ? done / BOOKINGS.length * 100 : 0}%"></span></div></div>
   <div class="list">${sorted.map(b => todoRow(b, true)).join("")}</div>
-  <p class="note">排序：現在就能訂的在最上面，接著是還沒開放的（依開放日期）。訂好哪一項跟 Claude 說一聲，狀態會更新在這裡（約一分鐘後生效）。</p>
+  <p class="note">買好一項就點左邊的框框打勾，已訂的會排到最下面；${ASSETS && DB ? "每一項都可以上傳確認信或票券（圖片或 PDF），上傳後會自動打勾。" : ""}${esc(tickWhere)}。排序：現在就能訂的在最上面，接著是還沒開放的（依開放日期）。</p>
   <div class="sec-t">導遊與跟團</div>
   <div class="prep">${GUIDES.map(g => `<div><dt>${esc(g.t)}<span class="need">${esc(g.need)}</span></dt><dd>${esc(g.d)}</dd></div>`).join("")}</div>
   <div class="sec-t">出發前準備</div>
@@ -853,8 +948,14 @@ function go(i, toDay){
   if (scrollY > mainTop) scrollTo({top: Math.max(0, mainTop), behavior: "smooth"});
 }
 document.addEventListener("click", e => {
+  const tk = e.target.closest("[data-tick]"); if (tk) { toggleBooked(tk.dataset.tick); return; }
+  const fd = e.target.closest("[data-fdel]"); if (fd) { const [bid, fid] = fd.dataset.fdel.split("|"); removeFile(bid, fid); return; }
   const tab = e.target.closest(".tab"); if (tab) { state.tab = tab.dataset.tab; render(); return; }
   const g = e.target.closest("[data-go]"); if (g) go(+g.dataset.go, true);
+});
+document.addEventListener("change", e => {
+  const inp = e.target.closest && e.target.closest("input[data-up]");
+  if (inp && inp.files) uploadFiles(inp.dataset.up, inp.files);
 });
 document.addEventListener("keydown", e => {
   if (state.tab !== "day" || e.target.closest("input,textarea")) return;
