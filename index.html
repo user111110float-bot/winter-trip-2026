@@ -168,6 +168,7 @@ ol.plan li:first-child{border-top:0}
 .up:hover{border-color:var(--ok);color:var(--ok)}
 .up input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
 .upmsg{flex-basis:100%;font-size:12px;color:var(--bad)}
+.upnote{font-size:13px;color:var(--warn);background:color-mix(in srgb,var(--warn) 10%,transparent);border-radius:10px;padding:8px 12px;margin:0 0 12px}
 .todo.is-done .itm{text-decoration:line-through;text-decoration-color:color-mix(in srgb,var(--muted) 60%,transparent);color:var(--muted)}
 .gyg{display:inline-flex;flex-wrap:wrap;align-items:baseline;gap:4px 8px;margin-top:6px;padding:4px 12px;border-radius:999px;border:1px solid var(--gyg);color:var(--gyg);text-decoration:none;font-size:13px;font-weight:700}
 .gyg span{font-weight:400;font-size:12px;color:var(--muted)}
@@ -746,7 +747,7 @@ document.getElementById("segbar").innerHTML = groups.map(g => `<span style="--c:
 document.getElementById("seglegend").innerHTML = groups.map(g => `<span style="--c:${COLORS[g.seg]}"><i></i>${esc(SEGMENTS[g.seg].name)} ${g.days[0].date}–${g.days[g.days.length-1].date}</span>`).join("");
 // booked state: shared db (artifact) or this browser (fallback); overrides the static status
 const BOOKED = {}; // id -> {done, at, files:[{id,name,type,size}]}
-let ASSETS = null; const UPLOADING = {}; const ARMED = {};
+let ASSETS = null, ASSETS_CHECKED = false; const UPLOADING = {}; const ARMED = {};
 let canTick = false, tickWhere = "";
 const isDone = b => BOOKED[b.id] ? !!BOOKED[b.id].done : b.status === "已訂";
 const pendingCount = () => BOOKINGS.filter(b => !isDone(b)).length;
@@ -769,6 +770,14 @@ async function saveBooking(id, next){
   } else saveLocal();
 }
 const OKTYPES = ["image/png","image/jpeg","image/gif","image/webp","application/pdf"];
+async function toJpeg(file){
+  const bmp = await createImageBitmap(file);
+  const scale = Math.min(1, 3000 / Math.max(bmp.width, bmp.height));
+  const cv = document.createElement("canvas"); cv.width = Math.round(bmp.width * scale); cv.height = Math.round(bmp.height * scale);
+  cv.getContext("2d").drawImage(bmp, 0, 0, cv.width, cv.height);
+  const blob = await new Promise((res, rej) => cv.toBlob(b => b ? res(b) : rej(new Error("encode")), "image/jpeg", 0.88));
+  return new File([blob], file.name.replace(/\.[^.]+$/, "") + ".jpg", {type:"image/jpeg"});
+}
 const upMsg = {};
 async function uploadFiles(id, fileList){
   if (!ASSETS || !DB) return;
@@ -776,8 +785,12 @@ async function uploadFiles(id, fileList){
   UPLOADING[id] = true; upMsg[id] = ""; render();
   const cur = Object.assign({files:[]}, BOOKED[id] || {});
   const added = [];
-  for (const f of files) {
+  for (let f of files) {
     let type = f.type;
+    // phones: HEIC/HEIF or oversized photos -> re-encode as JPEG in the browser
+    if ((/^image\//.test(type) && !OKTYPES.includes(type)) || /\.(heic|heif)$/i.test(f.name) || (/^image\//.test(type) && f.size > 8 * 1024 * 1024)) {
+      try { f = await toJpeg(f); type = "image/jpeg"; } catch(e) {}
+    }
     if (!type) { const ext = (f.name.split(".").pop() || "").toLowerCase(); type = {pdf:"application/pdf",png:"image/png",jpg:"image/jpeg",jpeg:"image/jpeg",gif:"image/gif",webp:"image/webp"}[ext] || ""; }
     if (!OKTYPES.includes(type)) { upMsg[id] = `「${f.name}」格式不支援，請上傳 JPG、PNG、WebP、GIF 或 PDF（iPhone 的 HEIC 照片請先轉成 JPG 或截圖）`; continue; }
     if (f.size > 20 * 1024 * 1024) { upMsg[id] = `「${f.name}」超過 20 MB，請壓縮後再上傳`; continue; }
@@ -808,7 +821,7 @@ async function removeFile(id, fid){
   const user = await c.use("user");
   const w = user ? await user.can("data.write") : null;
   canTick = w !== false; tickWhere = canTick ? "勾選會同步給所有能編輯的人" : "你目前只有檢視權限，不能勾選";
-  ASSETS = await c.use("assets");
+  ASSETS = await c.use("assets"); ASSETS_CHECKED = true;
   db.collection("bookings").onSnapshot(snap => {
     snap.docs.forEach(d => { const v = d.data(); if (v) BOOKED[d.id] = {done: !!v.done, at: v.at, files: Array.isArray(v.files) ? v.files : []}; });
     updateCount(); render();
@@ -839,7 +852,7 @@ function todoRow(b, showDay){
       const u = "/_blob/" + f.id; const img = /^image\//.test(f.type);
       const del = ASSETS ? `<button class="fdel ${ARMED[b.id + f.id] ? "armed" : ""}" data-fdel="${esc(b.id)}|${esc(f.id)}" aria-label="刪除 ${esc(f.name)}">${ARMED[b.id + f.id] ? "確定刪除？" : "×"}</button>` : "";
       return `<span class="file">${img ? `<a href="${u}" target="_blank" rel="noopener"><img src="${u}" alt="${esc(f.name)}" loading="lazy"></a>` : `<a class="pdf" href="${u}" target="_blank" rel="noopener">PDF・${esc(f.name)}</a>`}${del}</span>`;
-    }).join("")}${ASSETS && DB ? `<label class="up">${UPLOADING[b.id] ? "上傳中…" : "＋ 上傳確認信／票券"}<input type="file" accept="image/png,image/jpeg,image/gif,image/webp,application/pdf" multiple data-up="${esc(b.id)}" ${UPLOADING[b.id] ? "disabled" : ""}></label>` : ""}${upMsg[b.id] ? `<span class="upmsg">${esc(upMsg[b.id])}</span>` : ""}</div>` : "";
+    }).join("")}${ASSETS && DB ? `<label class="up">${UPLOADING[b.id] ? "上傳中…" : "＋ 上傳確認信／票券"}<input type="file" accept="image/*,application/pdf,.pdf" multiple data-up="${esc(b.id)}" ${UPLOADING[b.id] ? "disabled" : ""}></label>` : ""}${upMsg[b.id] ? `<span class="upmsg">${esc(upMsg[b.id])}</span>` : ""}</div>` : "";
   return `<div class="todo ${done ? "is-done" : ""}">${st}<div><span class="itm">${esc(b.item)}</span>${meta ? `<small>${meta}</small>` : ""}${gyg}${files}</div>${dayBtn}</div>`;
 }
 function legRow(l, showDay){
@@ -923,6 +936,7 @@ function renderBk(){
   return `<div class="bk">
   <div class="sec-t" style="margin-top:4px">要預訂的 ${BOOKINGS.length} 項</div>
   <div class="prog"><span>${done} / ${BOOKINGS.length} 已訂・${nowOpen} 項現在就能訂</span><div class="bar"><span style="width:${BOOKINGS.length ? done / BOOKINGS.length * 100 : 0}%"></span></div></div>
+  ${DB && !ASSETS && ASSETS_CHECKED ? `<p class="upnote">這個裝置或帳號目前不能上傳檔案：只有擁有者和編輯者可以上傳；如果是手機 App 不支援，請改用電腦，或用手機瀏覽器登入 claude.ai 開啟。</p>` : ""}
   <div class="list">${sorted.map(b => todoRow(b, true)).join("")}</div>
   <p class="note">買好一項就點左邊的框框打勾，打勾後位置不會變；${ASSETS && DB ? "每一項都可以上傳確認信或票券（圖片或 PDF），上傳後會自動打勾。" : ""}${esc(tickWhere)}。排序：現在就能訂的在最上面，接著是還沒開放的（依開放日期）。</p>
   <div class="sec-t">導遊與跟團</div>
