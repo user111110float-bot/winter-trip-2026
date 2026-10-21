@@ -917,14 +917,14 @@ function renderTr(){
 
 function renderBk(){
   const done = BOOKINGS.length - pendingCount();
-  const rank = b => isDone(b) ? 2 : opensInfo(b).open ? 0 : 1;
+  const rank = b => opensInfo(b).open ? 0 : 1;
   const sorted = BOOKINGS.slice().sort((a, b) => rank(a) - rank(b) || (rank(a) === 1 ? opensInfo(a).at - opensInfo(b).at : 0) || (+a.day.slice(1)) - (+b.day.slice(1)));
-  const nowOpen = BOOKINGS.filter(b => rank(b) === 0).length;
+  const nowOpen = BOOKINGS.filter(b => !isDone(b) && rank(b) === 0).length;
   return `<div class="bk">
   <div class="sec-t" style="margin-top:4px">要預訂的 ${BOOKINGS.length} 項</div>
   <div class="prog"><span>${done} / ${BOOKINGS.length} 已訂・${nowOpen} 項現在就能訂</span><div class="bar"><span style="width:${BOOKINGS.length ? done / BOOKINGS.length * 100 : 0}%"></span></div></div>
   <div class="list">${sorted.map(b => todoRow(b, true)).join("")}</div>
-  <p class="note">買好一項就點左邊的框框打勾，已訂的會排到最下面；${ASSETS && DB ? "每一項都可以上傳確認信或票券（圖片或 PDF），上傳後會自動打勾。" : ""}${esc(tickWhere)}。排序：現在就能訂的在最上面，接著是還沒開放的（依開放日期）。</p>
+  <p class="note">買好一項就點左邊的框框打勾，打勾後位置不會變；${ASSETS && DB ? "每一項都可以上傳確認信或票券（圖片或 PDF），上傳後會自動打勾。" : ""}${esc(tickWhere)}。排序：現在就能訂的在最上面，接著是還沒開放的（依開放日期）。</p>
   <div class="sec-t">導遊與跟團</div>
   <div class="prep">${GUIDES.map(g => `<div><dt>${esc(g.t)}<span class="need">${esc(g.need)}</span></dt><dd>${esc(g.d)}</dd></div>`).join("")}</div>
   <div class="sec-t">出發前準備</div>
