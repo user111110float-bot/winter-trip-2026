@@ -269,7 +269,7 @@ ol.plan li:first-child{border-top:0}
    ================================================================== */
 const TRIP = {
   title: "聖誕跨年蜜月",
-  route: "12/18 深夜出發 · 台北 → 羅瓦涅米 → 巴黎迪士尼 → 威尼斯 → 佛羅倫斯 → 羅馬 → 台北",
+  route: "12/18 22:00 出發 · 台北 → 羅瓦涅米 → 巴黎迪士尼 → 威尼斯 → 佛羅倫斯 → 羅馬 → 台北",
   START: "2026-12-19",
 };
 
@@ -282,22 +282,22 @@ const SEGMENTS = {
 };
 
 const DAYS = [
-  { seg:"lap", city:"台北 → 羅瓦涅米", short:"抵達極圈", theme:"啟程・極夜的召喚",
+  { seg:"lap", city:"台北 → 伊斯坦堡 → 羅瓦涅米", short:"抵達極圈", theme:"啟程・極夜的召喚",
     route:["Rovaniemi Airport","Rovaniemi city centre","Jätkänkynttilä Bridge Rovaniemi"], rmode:"driving",
-    hops:[["Taipei Taoyuan Airport","start"],["Helsinki Airport","flight"],["Rovaniemi Airport","flight"],["Rovaniemi city centre","car"],["Jätkänkynttilä Bridge Rovaniemi","walk"]],
+    hops:[["Taipei Taoyuan Airport","start"],["Istanbul Airport","flight"],["Rovaniemi Airport","flight"],["Rovaniemi city centre","car"],["Jätkänkynttilä Bridge Rovaniemi","walk"]],
     plan:[
-      {t:"前晚深夜", title:"12/18 桃園出發", desc:"台北沒有直飛芬蘭，搭夜班機到香港或東京，轉芬蘭航空飛赫爾辛基"},
-      {t:"清晨", title:"赫爾辛基轉國內線", desc:"入境申根、行李直掛到羅瓦涅米；快閃 Moomin 咖啡，買極光手套"},
-      {t:"中午前後", title:"抵達羅瓦涅米・進市區", desc:"機場巴士或計程車約 15 分鐘，呼吸第一口 -15°C 的清冽"},
-      {t:"下午", title:"市區飯店 Check-in", desc:"市中心的設計旅店；先補眠", map:"Rovaniemi city centre"},
-      {t:"傍晚", title:"市區散步・燭光橋", desc:"下午就天黑，走去看市區聖誕燈和河上的燭光橋（Jätkänkynttilä），在市區吃第一頓北極料理", map:"Jätkänkynttilä Bridge Rovaniemi"},
+      {t:"12/18 22:00", title:"桃園起飛（TK25）", desc:"土耳其航空飛伊斯坦堡，前一晚出發，機上睡一覺"},
+      {t:"清晨", title:"伊斯坦堡轉機（TK1749）", desc:"伊斯坦堡機場很大，下機先看轉機登機門；行李直掛羅瓦涅米"},
+      {t:"13:30", title:"抵達羅瓦涅米・入境申根", desc:"伊斯坦堡不屬於申根區，在羅瓦涅米機場第一次入境申根，要按指紋、拍照（EES），機場小但排隊可能久一點"},
+      {t:"14:30", title:"進市區・市區飯店 Check-in", desc:"機場巴士或計程車約 15 分鐘；市中心的設計旅店；先補眠", map:"Rovaniemi city centre"},
+      {t:"傍晚", title:"市區散步・燭光橋", desc:"下午 3 點多天就黑了，走去看市區聖誕燈和河上的燭光橋（Jätkänkynttilä），在市區吃第一頓北極料理", map:"Jätkänkynttilä Bridge Rovaniemi"},
     ],
     hl:[
-      {tag:"氛圍", title:"極夜初體驗", desc:"下午就天黑，整個城市泡在藍調時刻裡，像水彩暈開"},
+      {tag:"氛圍", title:"極夜初體驗", desc:"一下飛機天色就開始暗，整個城市泡在藍調時刻裡，像水彩暈開"},
       {tag:"美食", title:"市區晚餐", desc:"只有今晚住市區，餐廳選擇最多，試試馴鹿肉和北極紅點鮭"},
     ],
-    tips:"轉機總共約 18–20 小時，機上就換上發熱衣、多喝水。今晚只住市區一晚，市區光害大，極光留給後面三晚的玻璃屋。明天一早要退房，大行李今晚先整理好。",
-    stay:"羅瓦涅米市區飯店（1 晚）", transport:"台北 → 香港/東京 → 赫爾辛基 → 羅瓦涅米（航班待訂）", temp:"-12°C ~ -18°C・白天很短" },
+    tips:"全程約 21.5 小時，機上就換上發熱衣、多喝水；托運行李每人 30 公斤。羅瓦涅米比台灣慢 6 小時，到的時候台灣已經是晚上 7 點半，今晚早點睡。今晚只住市區一晚，市區光害大，極光留給後面三晚的玻璃屋。明天一早要退房，大行李今晚先整理好。",
+    stay:"羅瓦涅米市區飯店（1 晚）", transport:"土耳其航空 TK25 + TK1749（已訂）", temp:"-12°C ~ -18°C・白天很短" },
 
   { seg:"lap", city:"行李先到玻璃屋・聖誕老人村・馴鹿・哈士奇", short:"聖誕老人村", theme:"童話成真・跨越北極圈",
     route:["Rovaniemi city centre","Santa Claus Village Rovaniemi","Santa Claus Village Rovaniemi","Santa Claus Village Rovaniemi"], rmode:"driving",
@@ -542,14 +542,14 @@ const DAYS = [
 
 /* 預訂清單：id 固定不要改（勾選紀錄靠它對應）；status "待訂"|"已訂"（頁面上勾選的會蓋過這裡）；opens = 幾天前開放預訂（不填代表現在就能訂）；where = 去哪訂；gyg = GetYourGuide 連結 {url, price, rating} */
 const BOOKINGS = [
-  {id:"flight-out", item:"去程機票 台北 → 赫爾辛基 → 羅瓦涅米", day:"D1", status:"待訂", where:"芬蘭航空官網或旅行社，一張票訂到底", note:"沒有直飛，12/18 深夜出發，經香港/東京轉機"},
+  {id:"flight-out", item:"去程機票 台北 → 伊斯坦堡 → 羅瓦涅米（TK25 + TK1749）", day:"D1", status:"已訂", where:"土耳其航空", note:"；FlexFly 經濟艙，托運 30 公斤，可改票（要收手續費）"},
   {id:"hotel-city", item:"市區飯店（1 晚）", day:"D1", status:"待訂", where:"飯店官網或訂房網站", note:"12/20 早上 7:30 退房、8:00 叫車"},
   {id:"tour-santa", item:"聖誕老人村 + 馴鹿、哈士奇雪橇（6 小時）", day:"D2", status:"待訂", where:"GetYourGuide", gyg:{url:"https://www.getyourguide.com/rovaniemi-l2653/rovaniemi-reindeer-huskies-and-santa-claus-experience-t301148/", price:"US$211 起／人", rating:"4.6（2,417 則）"}, note:"含接送、午餐、保暖衣；接送地點填 森林玻璃屋，並確認結束也送回玻璃屋"},
   {id:"tour-snowmobile", item:"雪地摩托荒野之旅（2 小時）", day:"D3", status:"待訂", where:"GetYourGuide", gyg:{url:"https://www.getyourguide.com/rovaniemi-l2653/rovaniemi-guided-wilderness-snowmobile-ride-t527869/", price:"US$115 起／人", rating:"4.7（783 則）"}, note:"含 森林玻璃屋 接送和保暖裝備；2 人共騎，各騎一台每人加 €60"},
   {id:"hotel-igloo", item:"森林玻璃屋 玻璃屋（3 晚，12/20–12/22）", day:"D2", status:"待訂", where:"飯店官網或訂房網站", note:"聖誕週最搶，越早越好；確認 12/20 早上 8 點可以先寄放行李"},
   {id:"tour-ranua", item:"Ranua 動物園半日團（5 小時）", day:"D4", status:"待訂", where:"GetYourGuide", gyg:{url:"https://www.getyourguide.com/rovaniemi-l2653/rovaniemi-ranua-zoo-wildlife-park-tour-with-hotel-pickup-t840912/", price:"US$129 起／人", rating:"4.6（7 則，評價數少）"}, note:"含飯店接送、門票、英文導遊"},
   {id:"tour-aurora", item:"極光雪鞋健行（3 小時）", day:"D4", status:"待訂", where:"GetYourGuide", gyg:{url:"https://www.getyourguide.com/rovaniemi-l2653/night-snowshoeing-adventure-under-the-northern-lights-t510725/", price:"US$118 起／人", rating:"4.5（53 則）"}, note:"含接送、雪鞋和保暖衣；住離市中心 10 km 以上要加接送費，訂的時候確認 玻璃屋 算不算"},
-  {id:"flight-rvn-cdg", item:"羅瓦涅米 → 巴黎機票", day:"D5", status:"待訂", where:"芬蘭航空官網", note:"和去程一起訂可能更便宜"},
+  {id:"flight-rvn-cdg", item:"羅瓦涅米 → 巴黎機票", day:"D5", status:"待訂", where:"芬蘭航空或其他航空官網", note:"去程是土耳其航空的單獨機票，這段要另外訂"},
   {id:"hotel-newport", item:"湖畔飯店（12/23–24，2 晚）＋門票、Plus 餐券、PhotoPass+、夜間秀觀賞區、機場接駁", day:"D5", status:"已訂", where:"迪士尼官網", note:"入住前 7 天可免費更改或取消"},
   {id:"hotel-disney", item:"迪士尼園區飯店（12/25，1 晚）＋兩天兩園門票、Premium 餐券", day:"D7", status:"已訂", where:"迪士尼官網", note:"入住前 7 天可免費更改或取消"},
   {id:"dinner-xmas-eve", item:"迪士尼晚餐訂位（12/24、12/25，用餐券）", day:"D6", status:"待訂", where:"迪士尼 App", opens:60, note:"餐廳可能會換，訂得到哪間就去哪間；Plus 和 Premium 券能用的餐廳不同"},
@@ -576,7 +576,7 @@ const BOOKINGS = [
 
 /* 交通：每一段怎麼移動。mode 是交通方式，tip 是要注意的地方 */
 const LEGS = [
-  {day:"D1", from:"台北", to:"羅瓦涅米", mode:"飛機", how:"經香港或東京轉芬蘭航空到赫爾辛基，再轉國內線到羅瓦涅米。一張票訂到底，行李直掛。", tip:"赫爾辛基是第一個申根入境點，要做指紋和拍照的入境登記（EES），轉機時間至少留 2 小時。"},
+  {day:"D1", from:"台北", to:"羅瓦涅米", mode:"飛機", how:"土耳其航空 TK25 12/18 22:00 起飛，在伊斯坦堡轉 TK1749，12/19 13:30 到羅瓦涅米，行李直掛。", tip:"伊斯坦堡不屬於申根區，第一次入境申根是在羅瓦涅米機場，要做指紋和拍照的入境登記（EES）。"},
   {day:"D1", from:"羅瓦涅米機場", to:"市區飯店（市中心）", mode:"機場巴士 / 計程車", how:"機場巴士配合航班發車，上車刷卡付約 €8；計程車約 €25–35，約 15 分鐘。", tip:"不用預約。"},
   {day:"D2", from:"市區飯店", to:"森林玻璃屋（放行李）", mode:"計程車", how:"早上 8 點帶行李搭計程車，約 15 分鐘，行李寄放在玻璃屋櫃台。", tip:"當地叫車可用 Meneva App，或請飯店櫃台叫車。"},
   {day:"D2", from:"森林玻璃屋", to:"聖誕老人村、馴鹿、哈士奇", mode:"行程接送", how:"GetYourGuide 行程的業者到玻璃屋接，結束送回玻璃屋。", tip:"訂的時候接送地點填 森林玻璃屋；玻璃屋 的房間分散在森林裡，櫃台有接駁車送到房間。"},
@@ -614,7 +614,7 @@ const LEGS = [
 /* 出發前準備 */
 const PREP = [
   {t:"護照", d:"台灣護照免簽入境申根 90 天；護照效期要在離開申根那天之後還剩 3 個月以上。"},
-  {t:"入境登記 EES", d:"第一次入境申根（赫爾辛基）要按指紋、拍照，第一次會比較久，轉機時間要留寬。"},
+  {t:"入境登記 EES", d:"第一次入境申根（羅瓦涅米機場）要按指紋、拍照，第一次會比較久。"},
   {t:"ETIAS", d:"歐盟預計 2026 年第四季上線，上線初期有過渡期、不會擋人。出發前一個月上歐盟官網確認，已開放的話就先線上申請（€20）。"},
   {t:"付款", d:"芬蘭、法國、義大利幾乎都能感應刷卡。帶兩張不同發卡組織的卡，加少量歐元現金給貢多拉、小費和小店。"},
   {t:"手機 App", d:"Finnair、Disneyland Paris（快速通關、餐廳、節目時間）、Île-de-France Mobilités（巴黎地鐵）、ACTV hellovenice（威尼斯水上巴士）、Trenitalia / Italo、Uber 和 FREENOW（巴黎、羅馬叫車）、Google 離線地圖。"},
