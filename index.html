@@ -319,19 +319,22 @@ const DAYS = [
     stay:"森林玻璃屋・玻璃屋景觀套房（3 晚）", transport:"計程車送行李到玻璃屋・行程業者接送", temp:"-15°C ~ -20°C・體感更冷" },
 
   { seg:"lap", city:"雪地摩托・SantaPark", short:"雪地摩托", theme:"冬至・一年最長的夜",
-    route:["Santa Claus Village Rovaniemi","SantaPark Rovaniemi"], rmode:"walking",
+    route:["Santa Claus Village Rovaniemi","Arctic GM Rovaniemi Valtakatu 26","Santa Claus Village Rovaniemi","SantaPark Rovaniemi"], rmode:"driving",
+    hops:[["Santa Claus Village Rovaniemi","start"],["Arctic GM Rovaniemi Valtakatu 26","car"],["Santa Claus Village Rovaniemi","car"],["SantaPark Rovaniemi","walk"]],
     plan:[
-      {t:"09:00", title:"睡飽吃早餐", desc:"不用搬行李的早晨，在飯店餐廳慢慢吃"},
-      {t:"上午", title:"雪地摩托荒野之旅", desc:"業者直接到 森林玻璃屋 接，約 2 小時，2 人共騎一台騎約 1 小時，穿越結凍的河面和森林"},
-      {t:"14:00", title:"SantaPark（可選）", desc:"在山洞裡的聖誕主題樂園，有精靈學校和薑餅屋", map:"SantaPark Rovaniemi"},
+      {t:"07:30", title:"早餐", desc:"在飯店吃早餐"},
+      {t:"08:15", title:"計程車到市中心", desc:"約 15 分鐘到 Arctic GM 市中心辦公室（Valtakatu 26），08:40 前報到"},
+      {t:"09:00", title:"雪地摩托 2025 年新車（已訂）", desc:"報到後搭遊覽車到私人森林，2 人共騎一台、中途可交換駕駛，穿越森林和苔原；約 3 小時，結束回到辦公室"},
+      {t:"12:00", title:"市區午餐・回玻璃屋", desc:"在市中心吃午餐，再搭計程車回 森林玻璃屋"},
+      {t:"14:30", title:"SantaPark（可選）", desc:"在山洞裡的聖誕主題樂園，有精靈學校和薑餅屋", map:"SantaPark Rovaniemi"},
       {t:"晚上", title:"飯店晚餐・第二晚玻璃屋", desc:"今天是冬至，一年最長的夜，極光的時間也最長"},
     ],
     hl:[
-      {tag:"體驗", title:"雪地摩托", desc:"業者有保暖連身衣、靴子、手套、頭盔和頭套；導遊評價很高"},
+      {tag:"體驗", title:"雪地摩托", desc:"業者提供安全帽、保暖連身衣和全套裝備，出發前有實地操作教學"},
       {tag:"蜜月", title:"冬至的極光夜", desc:"不用出門，躺在玻璃屋裡等就好"},
     ],
-    tips:"雪地摩托 2 人共騎一台，想各騎一台每人加 €60。SantaPark 營業時間以官網為準。今天是最輕鬆的一天，留體力晚上等極光。",
-    stay:"森林玻璃屋・第二晚", transport:"業者接送・步行", temp:"-18°C ~ -25°C・活動日注意保暖" },
+    tips:"開雪地摩托的人要帶駕照正本（B 類小客車），台灣駕照建議加帶國際駕照；也要帶護照。駕駛人每台最多要負責 €950 的損害。不能帶行李箱或大包包。業者會在前 1 天通知確切出發時間。12/20 上午 9:00 前取消可全額退款。",
+    stay:"森林玻璃屋・第二晚", transport:"計程車往返市中心・步行", temp:"-18°C ~ -25°C・活動日注意保暖" },
 
   { seg:"lap", city:"Ranua・最後極光狩獵", short:"北極動物園", theme:"白色王國・最後的極光",
     route:["Santa Claus Village Rovaniemi", "Ranua Zoo", "Santa Claus Village Rovaniemi"], rmode:"driving",
@@ -545,7 +548,7 @@ const BOOKINGS = [
   {id:"flight-out", item:"去程機票 台北 → 伊斯坦堡 → 羅瓦涅米（TK25 + TK1749）", day:"D1", status:"已訂", where:"土耳其航空", note:"；FlexFly 經濟艙，托運 30 公斤，可改票（要收手續費）"},
   {id:"hotel-city", item:"市區飯店（1 晚）", day:"D1", status:"待訂", where:"飯店官網或訂房網站", note:"12/20 早上 7:30 退房、8:00 叫車"},
   {id:"tour-santa", item:"聖誕老人村 + 馴鹿、哈士奇雪橇（6 小時）", day:"D2", status:"待訂", where:"GetYourGuide", gyg:{url:"https://www.getyourguide.com/rovaniemi-l2653/rovaniemi-reindeer-huskies-and-santa-claus-experience-t301148/", price:"US$211 起／人", rating:"4.6（2,417 則）"}, note:"含接送、午餐、保暖衣；接送地點填 森林玻璃屋，並確認結束也送回玻璃屋"},
-  {id:"tour-snowmobile", item:"雪地摩托荒野之旅（2 小時）", day:"D3", status:"待訂", where:"GetYourGuide", gyg:{url:"https://www.getyourguide.com/rovaniemi-l2653/rovaniemi-guided-wilderness-snowmobile-ride-t527869/", price:"US$115 起／人", rating:"4.7（783 則）"}, note:"含 森林玻璃屋 接送和保暖裝備；2 人共騎，各騎一台每人加 €60"},
+  {id:"tour-snowmobile", item:"雪地摩托 2025 年新車（12/21 09:00，3 小時）", day:"D3", status:"已訂", where:"GetYourGuide", gyg:{url:"https://www.getyourguide.com/rovaniemi-l2653/rovaniemi-safari-mobil-salju-barbeque-di-hutan-belantara-berpemandu-t699161/", price:"已付 US$266.92（2 人）", rating:"4.7（2,288 則）"}, note:"08:40 前到 Arctic GM 市中心辦公室（Valtakatu 26），不含接送；駕駛要帶駕照"},
   {id:"hotel-igloo", item:"森林玻璃屋 玻璃屋（3 晚，12/20–12/22）", day:"D2", status:"待訂", where:"飯店官網或訂房網站", note:"聖誕週最搶，越早越好；確認 12/20 早上 8 點可以先寄放行李"},
   {id:"tour-ranua", item:"Ranua 動物園半日團（5 小時）", day:"D4", status:"待訂", where:"GetYourGuide", gyg:{url:"https://www.getyourguide.com/rovaniemi-l2653/rovaniemi-ranua-zoo-wildlife-park-tour-with-hotel-pickup-t840912/", price:"US$129 起／人", rating:"4.6（7 則，評價數少）"}, note:"含飯店接送、門票、英文導遊"},
   {id:"tour-aurora", item:"極光雪鞋健行（3 小時）", day:"D4", status:"待訂", where:"GetYourGuide", gyg:{url:"https://www.getyourguide.com/rovaniemi-l2653/night-snowshoeing-adventure-under-the-northern-lights-t510725/", price:"US$118 起／人", rating:"4.5（53 則）"}, note:"含接送、雪鞋和保暖衣；住離市中心 10 km 以上要加接送費，訂的時候確認 玻璃屋 算不算"},
@@ -580,7 +583,7 @@ const LEGS = [
   {day:"D1", from:"羅瓦涅米機場", to:"市區飯店（市中心）", mode:"機場巴士 / 計程車", how:"機場巴士配合航班發車，上車刷卡付約 €8；計程車約 €25–35，約 15 分鐘。", tip:"不用預約。"},
   {day:"D2", from:"市區飯店", to:"森林玻璃屋（放行李）", mode:"計程車", how:"早上 8 點帶行李搭計程車，約 15 分鐘，行李寄放在玻璃屋櫃台。", tip:"當地叫車可用 Meneva App，或請飯店櫃台叫車。"},
   {day:"D2", from:"森林玻璃屋", to:"聖誕老人村、馴鹿、哈士奇", mode:"行程接送", how:"GetYourGuide 行程的業者到玻璃屋接，結束送回玻璃屋。", tip:"訂的時候接送地點填 森林玻璃屋；玻璃屋 的房間分散在森林裡，櫃台有接駁車送到房間。"},
-  {day:"D3", from:"森林玻璃屋", to:"雪地摩托", mode:"業者接送", how:"業者直接到 森林玻璃屋 接送。", tip:""},
+  {day:"D3", from:"森林玻璃屋", to:"Arctic GM 市中心辦公室", mode:"計程車", how:"08:15 出發，約 15 分鐘；08:40 前報到（Valtakatu 26）。行程結束回到同一個辦公室，吃完午餐再搭計程車回玻璃屋。", tip:"前一晚請飯店櫃台幫忙預約隔天早上的計程車，或用 Meneva App 叫車。"},
   {day:"D3", from:"森林玻璃屋", to:"SantaPark", mode:"步行", how:"從玻璃屋搭計程車或走路都不遠。", tip:""},
   {day:"D4", from:"玻璃屋", to:"Ranua 動物園", mode:"旅行團", how:"參加含交通的半日團，單程約 1 小時。", tip:"冬季雪地路況差，不建議自駕。"},
   {day:"D4", from:"玻璃屋", to:"極光健行", mode:"業者接送", how:"嚮導開車接送到沒有光害的地方。", tip:"雲層厚時會開很遠，要有心理準備。"},
@@ -614,6 +617,7 @@ const LEGS = [
 /* 出發前準備 */
 const PREP = [
   {t:"護照", d:"台灣護照免簽入境申根 90 天；護照效期要在離開申根那天之後還剩 3 個月以上。"},
+  {t:"駕照", d:"12/21 開雪地摩托要帶駕照正本（B 類小客車），台灣駕照建議加辦國際駕照一起帶。"},
   {t:"入境登記 EES", d:"第一次入境申根（羅瓦涅米機場）要按指紋、拍照，第一次會比較久。"},
   {t:"ETIAS", d:"歐盟預計 2026 年第四季上線，上線初期有過渡期、不會擋人。出發前一個月上歐盟官網確認，已開放的話就先線上申請（€20）。"},
   {t:"付款", d:"芬蘭、法國、義大利幾乎都能感應刷卡。帶兩張不同發卡組織的卡，加少量歐元現金給貢多拉、小費和小店。"},
@@ -635,8 +639,8 @@ const GUIDES = [
 ];
 /* ======================= 資料到此為止 ======================= */
 
-const COORDS = {"Taipei Taoyuan Airport": [25.0797, 121.2342], "Helsinki Airport": [60.3172, 24.9633], "Rovaniemi Airport": [66.558, 25.8275], "Rovaniemi city centre": [66.503, 25.729], "Santa Claus Village Rovaniemi": [66.5435, 25.8476], "Jätkänkynttilä Bridge Rovaniemi": [66.4981, 25.7128], "SantaPark Rovaniemi": [66.5378, 25.7985], "Ranua Zoo": [65.9434, 26.467], "Paris Charles de Gaulle Airport": [49.0079, 2.5508], "Disneyland Park Paris": [48.8711, 2.7788], "迪士尼湖畔飯店": [48.8702, 2.786], "Disney Adventure World Paris": [48.8681, 2.7804], "La Vallée Village": [48.8546, 2.7838], "Le Marais Paris": [48.8612, 2.3582], "Avenue Montaigne Paris": [48.8663, 2.3045], "Rue du Faubourg Saint-Honoré Paris": [48.8695, 2.319], "Galeries Lafayette Haussmann": [48.8735, 2.332], "Louvre Museum": [48.8606, 2.3376], "Merci 111 Boulevard Beaumarchais Paris": [48.8607, 2.3668], "Bateaux Parisiens Port de la Bourdonnais": [48.8574, 2.2905], "Le Jules Verne Paris": [48.8584, 2.2945], "Venice Marco Polo Airport": [45.5047, 12.3466], "Piazza San Marco Venice": [45.4342, 12.3385], "Piazza San Marco": [45.4342, 12.3385], "Doge's Palace Venice": [45.4337, 12.3404], "Burano": [45.4854, 12.4167], "Venezia Santa Lucia": [45.4411, 12.321], "Firenze Santa Maria Novella": [43.7767, 11.2479], "Mercato Centrale Firenze": [43.7765, 11.2528], "Cattedrale di Santa Maria del Fiore": [43.7731, 11.256], "Piazzale Michelangelo": [43.7629, 11.2651], "Ponte Vecchio": [43.7679, 11.2531], "Piazza della Repubblica Florence": [43.7715, 11.254], "Roma Termini": [41.9013, 12.5016], "Trastevere Rome": [41.8848, 12.4704], "Colosseum": [41.8902, 12.4922], "Roman Forum": [41.8921, 12.4864], "Trevi Fountain": [41.9009, 12.4833], "Piazza San Pietro": [41.9022, 12.4567], "Ponte Sant'Angelo": [41.9017, 12.4665], "Piazza Navona": [41.8992, 12.4731], "Vatican Museums": [41.9065, 12.4536], "St. Peter's Basilica": [41.9022, 12.4539], "Trattoria Da Enzo al 29 Rome": [41.8881, 12.4779], "Rome Fiumicino Airport": [41.8035, 12.2519], "Istanbul Airport": [41.2753, 28.7519]};
-const PLABEL = {"Taipei Taoyuan Airport": "桃園機場", "Helsinki Airport": "赫爾辛基機場", "Rovaniemi city centre": "羅瓦涅米市區", "Santa Claus Village Rovaniemi": "聖誕老人村", "Jätkänkynttilä Bridge Rovaniemi": "燭光橋", "SantaPark Rovaniemi": "SantaPark", "Rovaniemi Airport": "羅瓦涅米機場", "Ranua Zoo": "Ranua 動物園", "Paris Charles de Gaulle Airport": "CDG 機場", "Disneyland Park Paris": "迪士尼樂園", "迪士尼湖畔飯店": "迪士尼湖畔", "Disney Adventure World Paris": "Adventure World", "La Vallée Village": "La Vallée Village", "Le Marais Paris": "瑪黑區", "Avenue Montaigne Paris": "蒙田大道", "Rue du Faubourg Saint-Honoré Paris": "聖奧諾雷市郊路", "Galeries Lafayette Haussmann": "老佛爺百貨", "Louvre Museum": "羅浮宮", "Merci 111 Boulevard Beaumarchais Paris": "Merci", "Bateaux Parisiens Port de la Bourdonnais": "遊船碼頭", "Le Jules Verne Paris": "Jules Verne（鐵塔）", "Venice Marco Polo Airport": "威尼斯機場", "Piazza San Marco Venice": "聖馬可區", "Piazza San Marco": "聖馬可廣場", "Doge's Palace Venice": "道奇宮", "Burano": "Burano", "Venezia Santa Lucia": "威尼斯車站", "Firenze Santa Maria Novella": "佛羅倫斯車站", "Mercato Centrale Firenze": "中央市場", "Cattedrale di Santa Maria del Fiore": "百花大教堂", "Piazzale Michelangelo": "米開朗基羅廣場", "Ponte Vecchio": "老橋", "Piazza della Repubblica Florence": "共和廣場", "Roma Termini": "Termini 車站", "Trastevere Rome": "Trastevere", "Colosseum": "鬥獸場", "Roman Forum": "古羅馬廣場", "Trevi Fountain": "特萊維噴泉", "Piazza San Pietro": "聖彼得廣場", "Ponte Sant'Angelo": "聖天使橋", "Piazza Navona": "納沃納廣場", "Vatican Museums": "梵蒂岡博物館", "St. Peter's Basilica": "聖彼得大教堂", "Trattoria Da Enzo al 29 Rome": "Da Enzo", "Rome Fiumicino Airport": "羅馬機場", "Istanbul Airport": "伊斯坦堡機場"};
+const COORDS = {"Taipei Taoyuan Airport": [25.0797, 121.2342], "Helsinki Airport": [60.3172, 24.9633], "Rovaniemi Airport": [66.558, 25.8275], "Rovaniemi city centre": [66.503, 25.729], "Santa Claus Village Rovaniemi": [66.5435, 25.8476], "Jätkänkynttilä Bridge Rovaniemi": [66.4981, 25.7128], "SantaPark Rovaniemi": [66.5378, 25.7985], "Arctic GM Rovaniemi Valtakatu 26": [66.501, 25.733], "Ranua Zoo": [65.9434, 26.467], "Paris Charles de Gaulle Airport": [49.0079, 2.5508], "Disneyland Park Paris": [48.8711, 2.7788], "迪士尼湖畔飯店": [48.8702, 2.786], "Disney Adventure World Paris": [48.8681, 2.7804], "La Vallée Village": [48.8546, 2.7838], "Le Marais Paris": [48.8612, 2.3582], "Avenue Montaigne Paris": [48.8663, 2.3045], "Rue du Faubourg Saint-Honoré Paris": [48.8695, 2.319], "Galeries Lafayette Haussmann": [48.8735, 2.332], "Louvre Museum": [48.8606, 2.3376], "Merci 111 Boulevard Beaumarchais Paris": [48.8607, 2.3668], "Bateaux Parisiens Port de la Bourdonnais": [48.8574, 2.2905], "Le Jules Verne Paris": [48.8584, 2.2945], "Venice Marco Polo Airport": [45.5047, 12.3466], "Piazza San Marco Venice": [45.4342, 12.3385], "Piazza San Marco": [45.4342, 12.3385], "Doge's Palace Venice": [45.4337, 12.3404], "Burano": [45.4854, 12.4167], "Venezia Santa Lucia": [45.4411, 12.321], "Firenze Santa Maria Novella": [43.7767, 11.2479], "Mercato Centrale Firenze": [43.7765, 11.2528], "Cattedrale di Santa Maria del Fiore": [43.7731, 11.256], "Piazzale Michelangelo": [43.7629, 11.2651], "Ponte Vecchio": [43.7679, 11.2531], "Piazza della Repubblica Florence": [43.7715, 11.254], "Roma Termini": [41.9013, 12.5016], "Trastevere Rome": [41.8848, 12.4704], "Colosseum": [41.8902, 12.4922], "Roman Forum": [41.8921, 12.4864], "Trevi Fountain": [41.9009, 12.4833], "Piazza San Pietro": [41.9022, 12.4567], "Ponte Sant'Angelo": [41.9017, 12.4665], "Piazza Navona": [41.8992, 12.4731], "Vatican Museums": [41.9065, 12.4536], "St. Peter's Basilica": [41.9022, 12.4539], "Trattoria Da Enzo al 29 Rome": [41.8881, 12.4779], "Rome Fiumicino Airport": [41.8035, 12.2519], "Istanbul Airport": [41.2753, 28.7519]};
+const PLABEL = {"Taipei Taoyuan Airport": "桃園機場", "Helsinki Airport": "赫爾辛基機場", "Rovaniemi city centre": "羅瓦涅米市區", "Santa Claus Village Rovaniemi": "聖誕老人村", "Jätkänkynttilä Bridge Rovaniemi": "燭光橋", "SantaPark Rovaniemi": "SantaPark", "Arctic GM Rovaniemi Valtakatu 26": "雪地摩托集合點", "Rovaniemi Airport": "羅瓦涅米機場", "Ranua Zoo": "Ranua 動物園", "Paris Charles de Gaulle Airport": "CDG 機場", "Disneyland Park Paris": "迪士尼樂園", "迪士尼湖畔飯店": "迪士尼湖畔", "Disney Adventure World Paris": "Adventure World", "La Vallée Village": "La Vallée Village", "Le Marais Paris": "瑪黑區", "Avenue Montaigne Paris": "蒙田大道", "Rue du Faubourg Saint-Honoré Paris": "聖奧諾雷市郊路", "Galeries Lafayette Haussmann": "老佛爺百貨", "Louvre Museum": "羅浮宮", "Merci 111 Boulevard Beaumarchais Paris": "Merci", "Bateaux Parisiens Port de la Bourdonnais": "遊船碼頭", "Le Jules Verne Paris": "Jules Verne（鐵塔）", "Venice Marco Polo Airport": "威尼斯機場", "Piazza San Marco Venice": "聖馬可區", "Piazza San Marco": "聖馬可廣場", "Doge's Palace Venice": "道奇宮", "Burano": "Burano", "Venezia Santa Lucia": "威尼斯車站", "Firenze Santa Maria Novella": "佛羅倫斯車站", "Mercato Centrale Firenze": "中央市場", "Cattedrale di Santa Maria del Fiore": "百花大教堂", "Piazzale Michelangelo": "米開朗基羅廣場", "Ponte Vecchio": "老橋", "Piazza della Repubblica Florence": "共和廣場", "Roma Termini": "Termini 車站", "Trastevere Rome": "Trastevere", "Colosseum": "鬥獸場", "Roman Forum": "古羅馬廣場", "Trevi Fountain": "特萊維噴泉", "Piazza San Pietro": "聖彼得廣場", "Ponte Sant'Angelo": "聖天使橋", "Piazza Navona": "納沃納廣場", "Vatican Museums": "梵蒂岡博物館", "St. Peter's Basilica": "聖彼得大教堂", "Trattoria Da Enzo al 29 Rome": "Da Enzo", "Rome Fiumicino Airport": "羅馬機場", "Istanbul Airport": "伊斯坦堡機場"};
 
 let _maps = [];
 function drawMaps(){
