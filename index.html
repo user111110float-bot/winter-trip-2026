@@ -190,6 +190,23 @@ ol.plan li:first-child{border-top:0}
 .prep div{background:var(--surface);padding:10px 14px}
 .prep dt{font-weight:700;font-size:14.5px}
 .prep dd{margin:2px 0 0;font-size:14px;color:var(--muted)}
+/* 收藏指南 */
+.ctabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
+.ctab{padding:6px 14px;border-radius:999px;border:1px solid var(--line);background:var(--surface);font-size:14px;font-weight:500}
+.ctab[aria-selected="true"]{border-color:var(--c);color:var(--c);background:color-mix(in srgb,var(--c) 10%,var(--surface))}
+.ctab .n{font-family:var(--f-mono);font-size:11px;margin-left:4px;opacity:.75}
+.refs{display:flex;flex-direction:column;gap:10px}
+.ref{background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--c);border-radius:12px;padding:12px 14px}
+.ref-top{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px}
+.ref-top b{font-size:15.5px;flex:1;min-width:0}
+.ref .src{display:inline-block;margin-top:6px;font-size:13px;color:var(--c);border-bottom:1px dotted currentColor;text-decoration:none}
+.ref ul{margin:8px 0 0;padding-left:18px;font-size:14px}
+.ref li{margin:3px 0}
+.ref li small{color:var(--muted)}
+.ref .pend{margin-top:8px;font-size:13px;color:var(--warn)}
+.ref .rdays{display:flex;flex-wrap:wrap;gap:4px 12px;margin-top:4px}
+.ref .rn{margin-top:6px;font-size:13.5px;color:var(--muted)}
+.empty{color:var(--muted);font-size:14px;background:var(--soft);border-radius:12px;padding:14px 16px}
 .need{font-size:11px;font-weight:700;margin-left:8px;padding:1px 8px;border-radius:999px;background:var(--soft);color:var(--ink)}
 
 @media (max-width:860px){
@@ -246,6 +263,7 @@ ol.plan li:first-child{border-top:0}
       <button class="tab" role="tab" id="tab-day" data-tab="day">每日行程</button>
       <button class="tab" role="tab" id="tab-ov" data-tab="ov">總覽</button>
       <button class="tab" role="tab" id="tab-tr" data-tab="tr">交通</button>
+      <button class="tab" role="tab" id="tab-sv" data-tab="sv">收藏指南<span class="n" id="svCount"></span></button>
       <button class="tab" role="tab" id="tab-bk" data-tab="bk">預訂與準備<span class="n" id="bkCount"></span></button>
     </div>
     <div class="strip" id="strip"></div>
@@ -649,6 +667,16 @@ const GUIDES = [
   {t:"道奇宮", need:"可選", d:"可以自己逛；「秘密路線」導覽要另外預約。"},
   {t:"迪士尼、羅浮宮、百花圓頂、聖彼得", need:"不用", d:"自己去就好，重點是先訂好時段票。"},
 ];
+/* 收藏指南：貼來的 IG / 文章，依國家分頁
+   country 芬蘭/法國/義大利；area 區域；type 餐廳/景點/購物/攻略；days 對應行程天；
+   items 列出的店家或重點 {n 名稱, d 說明, map 地圖搜尋字}；pending 內容還沒整理時的說明 */
+const COUNTRIES = [{k:"芬蘭", seg:"lap"}, {k:"法國", seg:"par"}, {k:"義大利", seg:"rom"}];
+const REFS = [
+  {country:"法國", area:"巴黎・瑪黑區", type:"餐廳", title:"瑪黑區餐廳推薦", src:"Instagram Reel",
+   url:"https://www.instagram.com/reel/Dbxg6cbpK0C/", days:["D8","D9","D10"],
+   note:"住瑪黑的兩晚可以從這裡挑晚餐，D9 中午逛 Merci 時也能就近吃。",
+   items:[], pending:"店名還沒整理，傳影片截圖或說明文字過來就會補上"},
+];
 /* ======================= 資料到此為止 ======================= */
 
 const COORDS = {"Taipei Taoyuan Airport": [25.0797, 121.2342], "Helsinki Airport": [60.3172, 24.9633], "Rovaniemi Airport": [66.558, 25.8275], "Rovaniemi city centre": [66.503, 25.729], "Santa Claus Village Rovaniemi": [66.5435, 25.8476], "Jätkänkynttilä Bridge Rovaniemi": [66.4981, 25.7128], "SantaPark Rovaniemi": [66.5378, 25.7985], "Arctic GM Rovaniemi Valtakatu 26": [66.501, 25.733], "Ranua Zoo": [65.9434, 26.467], "Paris Charles de Gaulle Airport": [49.0079, 2.5508], "Disneyland Park Paris": [48.8711, 2.7788], "迪士尼湖畔飯店": [48.8702, 2.786], "Disney Adventure World Paris": [48.8681, 2.7804], "La Vallée Village": [48.8546, 2.7838], "Le Marais Paris": [48.8612, 2.3582], "Avenue Montaigne Paris": [48.8663, 2.3045], "Rue du Faubourg Saint-Honoré Paris": [48.8695, 2.319], "Galeries Lafayette Haussmann": [48.8735, 2.332], "Louvre Museum": [48.8606, 2.3376], "Merci 111 Boulevard Beaumarchais Paris": [48.8607, 2.3668], "Bateaux Parisiens Port de la Bourdonnais": [48.8574, 2.2905], "Le Jules Verne Paris": [48.8584, 2.2945], "Venice Marco Polo Airport": [45.5047, 12.3466], "Piazza San Marco Venice": [45.4342, 12.3385], "Piazza San Marco": [45.4342, 12.3385], "Doge's Palace Venice": [45.4337, 12.3404], "Burano": [45.4854, 12.4167], "Venezia Santa Lucia": [45.4411, 12.321], "Firenze Santa Maria Novella": [43.7767, 11.2479], "Mercato Centrale Firenze": [43.7765, 11.2528], "Cattedrale di Santa Maria del Fiore": [43.7731, 11.256], "Piazzale Michelangelo": [43.7629, 11.2651], "Ponte Vecchio": [43.7679, 11.2531], "Piazza della Repubblica Florence": [43.7715, 11.254], "Roma Termini": [41.9013, 12.5016], "Trastevere Rome": [41.8848, 12.4704], "Colosseum": [41.8902, 12.4922], "Roman Forum": [41.8921, 12.4864], "Trevi Fountain": [41.9009, 12.4833], "Pantheon Rome": [41.8986, 12.4769], "Gianicolo Terrace Rome": [41.8916, 12.4614], "Spanish Steps Rome": [41.906, 12.4828], "Via dei Condotti Rome": [41.9055, 12.4805], "Piazza San Pietro": [41.9022, 12.4567], "Ponte Sant'Angelo": [41.9017, 12.4665], "Piazza Navona": [41.8992, 12.4731], "Vatican Museums": [41.9065, 12.4536], "St. Peter's Basilica": [41.9022, 12.4539], "Trattoria Da Enzo al 29 Rome": [41.8881, 12.4779], "Rome Fiumicino Airport": [41.8035, 12.2519], "Istanbul Airport": [41.2753, 28.7519]};
@@ -745,11 +773,12 @@ const groups = [];
 DAYS.forEach(d => { const g = groups[groups.length - 1]; if (g && g.seg === d.seg) g.days.push(d); else groups.push({seg:d.seg, days:[d]}); });
 
 const store = { get(k){ try { return localStorage.getItem(k); } catch(e){ return null; } }, set(k,v){ try { localStorage.setItem(k,v); } catch(e){} } };
-let state = { tab: "day", day: 0 };
+let state = { tab: "day", day: 0, country: "法國" };
+{ const sc = store.get("hm-country"); if (COUNTRIES.some(c => c.k === sc)) state.country = sc; }
 const h = location.hash.replace("#", "").toLowerCase();
 if (/^d\d+$/.test(h) && +h.slice(1) <= DAYS.length) state.day = +h.slice(1) - 1;
-else if (["day","ov","tr","bk"].includes(h)) state.tab = h;
-else { const sd2 = +store.get("hm-day"); if (sd2 >= 0 && sd2 < DAYS.length) state.day = sd2; const st = store.get("hm-tab"); if (["day","ov","tr","bk"].includes(st)) state.tab = st; }
+else if (["day","ov","tr","sv","bk"].includes(h)) state.tab = h;
+else { const sd2 = +store.get("hm-day"); if (sd2 >= 0 && sd2 < DAYS.length) state.day = sd2; const st = store.get("hm-tab"); if (["day","ov","tr","sv","bk"].includes(st)) state.tab = st; }
 
 // header
 document.getElementById("tripTitle").textContent = TRIP.title;
@@ -967,13 +996,31 @@ function renderBk(){
   </div>`;
 }
 
+function renderSv(){
+  const cur = COUNTRIES.find(c => c.k === state.country) || COUNTRIES[0];
+  const tabs = COUNTRIES.map(c => `<button class="ctab" data-country="${esc(c.k)}" style="--c:${COLORS[c.seg]}" aria-selected="${c.k === cur.k}">${esc(c.k)}<span class="n">${REFS.filter(r => r.country === c.k).length}</span></button>`).join("");
+  const list = REFS.filter(r => r.country === cur.k);
+  const card = r => {
+    const ds = (r.days || []).map(dayById).filter(Boolean);
+    const dayBtns = ds.map(d => `<button class="on" data-go="${d.i}" style="color:${d.c}">${d.id} · ${d.date}</button>`).join("");
+    const items = r.items && r.items.length ? `<ul>${r.items.map(it => `<li><b>${esc(it.n)}</b>${it.d ? ` <small>${esc(it.d)}</small>` : ""}${it.map ? ` <a class="maplink" href="${mapUrl(it.map)}" target="_blank" rel="noopener">地圖</a>` : ""}</li>`).join("")}</ul>` : "";
+    return `<div class="ref" style="--c:${COLORS[cur.seg]}"><div class="ref-top"><span class="mode">${esc(r.type)}</span><b>${esc(r.title)}</b></div>${dayBtns ? `<div class="rdays">${dayBtns}</div>` : ""}
+      <div class="rn">${esc(r.area)}${r.note ? "・" + esc(r.note) : ""}</div>${items}
+      ${r.pending ? `<div class="pend">${esc(r.pending)}</div>` : ""}
+      ${r.url ? `<a class="src" href="${esc(r.url)}" target="_blank" rel="noopener">看原文（${esc(r.src || "連結")}）</a>` : ""}</div>`;
+  };
+  return `<div class="bk"><p class="lead">從 IG、文章收藏的推薦，依國家分類，點天數可以跳到那天的行程。</p><div class="ctabs" role="tablist">${tabs}</div>
+  ${list.length ? `<div class="refs">${list.map(card).join("")}</div>` : `<div class="empty">${esc(cur.k)}還沒有收藏的指南。</div>`}</div>`;
+}
+
 function render(){
   document.querySelectorAll(".tab").forEach(t => t.setAttribute("aria-selected", t.dataset.tab === state.tab));
   const main = document.getElementById("main");
-  main.innerHTML = state.tab === "day" ? renderDay() : state.tab === "ov" ? renderOv() : state.tab === "tr" ? renderTr() : renderBk();
+  main.innerHTML = state.tab === "day" ? renderDay() : state.tab === "ov" ? renderOv() : state.tab === "tr" ? renderTr() : state.tab === "sv" ? renderSv() : renderBk();
+  document.getElementById("svCount").textContent = REFS.length || "";
   renderStrip();
   drawMaps();
-  store.set("hm-day", state.day); store.set("hm-tab", state.tab);
+  store.set("hm-day", state.day); store.set("hm-tab", state.tab); store.set("hm-country", state.country);
 }
 function go(i, toDay){
   if (i < 0 || i >= DAYS.length) return;
@@ -985,6 +1032,7 @@ function go(i, toDay){
 document.addEventListener("click", e => {
   const tk = e.target.closest("[data-tick]"); if (tk) { toggleBooked(tk.dataset.tick); return; }
   const fd = e.target.closest("[data-fdel]"); if (fd) { const [bid, fid] = fd.dataset.fdel.split("|"); removeFile(bid, fid); return; }
+  const ct = e.target.closest("[data-country]"); if (ct) { state.country = ct.dataset.country; render(); return; }
   const tab = e.target.closest(".tab"); if (tab) { state.tab = tab.dataset.tab; render(); return; }
   const g = e.target.closest("[data-go]"); if (g) go(+g.dataset.go, true);
 });
