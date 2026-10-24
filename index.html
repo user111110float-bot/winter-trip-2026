@@ -668,13 +668,12 @@ const GUIDES = [
   {t:"迪士尼、羅浮宮、百花圓頂、聖彼得", need:"不用", d:"自己去就好，重點是先訂好時段票。"},
 ];
 /* 收藏指南：貼來的 IG / 文章，依國家分頁
-   country 芬蘭/法國/義大利；area 區域；type 餐廳/景點/購物/攻略；days 對應行程天；
+   country 芬蘭/法國/義大利；area 區域；type 餐廳/景點/購物/攻略；
    items 列出的店家或重點 {n 名稱, d 說明, map 地圖搜尋字}；pending 內容還沒整理時的說明 */
 const COUNTRIES = [{k:"芬蘭", seg:"lap"}, {k:"法國", seg:"par"}, {k:"義大利", seg:"rom"}];
 const REFS = [
   {country:"法國", area:"巴黎・瑪黑區", type:"餐廳", title:"瑪黑區餐廳推薦", src:"Instagram Reel",
-   url:"https://www.instagram.com/reel/Dbxg6cbpK0C/", days:["D8","D9","D10"],
-   note:"住瑪黑的兩晚可以從這裡挑晚餐，D9 中午逛 Merci 時也能就近吃。",
+   url:"https://www.instagram.com/reel/Dbxg6cbpK0C/",
    items:[], pending:"店名還沒整理，傳影片截圖或說明文字過來就會補上"},
 ];
 /* ======================= 資料到此為止 ======================= */
@@ -1001,15 +1000,13 @@ function renderSv(){
   const tabs = COUNTRIES.map(c => `<button class="ctab" data-country="${esc(c.k)}" style="--c:${COLORS[c.seg]}" aria-selected="${c.k === cur.k}">${esc(c.k)}<span class="n">${REFS.filter(r => r.country === c.k).length}</span></button>`).join("");
   const list = REFS.filter(r => r.country === cur.k);
   const card = r => {
-    const ds = (r.days || []).map(dayById).filter(Boolean);
-    const dayBtns = ds.map(d => `<button class="on" data-go="${d.i}" style="color:${d.c}">${d.id} · ${d.date}</button>`).join("");
     const items = r.items && r.items.length ? `<ul>${r.items.map(it => `<li><b>${esc(it.n)}</b>${it.d ? ` <small>${esc(it.d)}</small>` : ""}${it.map ? ` <a class="maplink" href="${mapUrl(it.map)}" target="_blank" rel="noopener">地圖</a>` : ""}</li>`).join("")}</ul>` : "";
-    return `<div class="ref" style="--c:${COLORS[cur.seg]}"><div class="ref-top"><span class="mode">${esc(r.type)}</span><b>${esc(r.title)}</b></div>${dayBtns ? `<div class="rdays">${dayBtns}</div>` : ""}
-      <div class="rn">${esc(r.area)}${r.note ? "・" + esc(r.note) : ""}</div>${items}
+    return `<div class="ref" style="--c:${COLORS[cur.seg]}"><div class="ref-top"><span class="mode">${esc(r.type)}</span><b>${esc(r.title)}</b></div>
+      <div class="rn">${esc(r.area)}</div>${items}
       ${r.pending ? `<div class="pend">${esc(r.pending)}</div>` : ""}
       ${r.url ? `<a class="src" href="${esc(r.url)}" target="_blank" rel="noopener">看原文（${esc(r.src || "連結")}）</a>` : ""}</div>`;
   };
-  return `<div class="bk"><p class="lead">從 IG、文章收藏的推薦，依國家分類，點天數可以跳到那天的行程。</p><div class="ctabs" role="tablist">${tabs}</div>
+  return `<div class="bk"><p class="lead">從 IG、文章收藏的推薦，依國家分類，方便回顧。</p><div class="ctabs" role="tablist">${tabs}</div>
   ${list.length ? `<div class="refs">${list.map(card).join("")}</div>` : `<div class="empty">${esc(cur.k)}還沒有收藏的指南。</div>`}</div>`;
 }
 
