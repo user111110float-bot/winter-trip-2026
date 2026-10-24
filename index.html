@@ -672,18 +672,56 @@ const GUIDES = [
    items 列出的店家或重點 {n 名稱, d 說明, map 地圖搜尋字}；pending 內容還沒整理時的說明 */
 const COUNTRIES = [{k:"芬蘭", seg:"lap"}, {k:"法國", seg:"par"}, {k:"義大利", seg:"rom"}];
 const REFS = [
-  {country:"法國", area:"巴黎・瑪黑區", type:"餐廳", title:"瑪黑區餐廳推薦", src:"Instagram Reel",
+  {country:"法國", area:"巴黎・瑪黑區", type:"餐廳", title:"瑪黑區必吃 5 家", src:"Instagram @yyyy_manda",
    url:"https://www.instagram.com/reel/Dbxg6cbpK0C/",
-   items:[], pending:"店名還沒整理，傳影片截圖或說明文字過來就會補上"},
-  {country:"法國", area:"巴黎", type:"攻略", title:"巴黎廁所指南", src:"Instagram Reel",
+   items:[
+     {n:"Benedict", d:"早午餐", map:"Benedict Paris Marais"},
+     {n:"Sevenly Heart", map:"Sevenly Heart Paris"},
+     {n:"Maurice Sfez Café", map:"Maurice Sfez Café Paris"},
+     {n:"Caractère de Cochon", d:"火腿三明治", map:"Caractère de Cochon Paris"},
+     {n:"Merci NOIR", d:"Merci 選物店裡的咖啡", map:"Merci 111 Boulevard Beaumarchais Paris"},
+   ]},
+  {country:"法國", area:"巴黎", type:"攻略", title:"巴黎上廁所指南", src:"Instagram @huangbaoche_global",
    url:"https://www.instagram.com/reel/DdBDldfAlz6/",
-   items:[], pending:"重點還沒整理，傳影片截圖或說明文字過來就會補上"},
-  {country:"義大利", area:"威尼斯", type:"餐廳", title:"威尼斯餐廳推薦", src:"Instagram Reel",
+   items:[
+     {n:"很多廁所要密碼", d:"咖啡館、商場消費後才能用，密碼常印在收據上，看到先拍下來"},
+     {n:"容易找到廁所的地方", d:"大型商場、博物館、火車站、景點附近，認 Toilettes 標示；可先下載找廁所的 App"},
+     {n:"真的急", d:"進附近咖啡館點最便宜的咖啡，或到大飯店大廳禮貌詢問"},
+   ]},
+  {country:"義大利", area:"威尼斯", type:"景點", title:"威尼斯 5 大行程", src:"Instagram @boglec",
    url:"https://www.instagram.com/reel/DX6oBMRDG4v/",
-   items:[], pending:"店名還沒整理，傳影片截圖或說明文字過來就會補上"},
-  {country:"義大利", area:"義大利", type:"冰淇淋", title:"義大利冰淇淋推薦", src:"Instagram 貼文",
+   note:"餐廳酒吧清單要在原文留言「水都」才會私訊給你，貼文本身沒有列。",
+   items:[
+     {n:"聖馬可廣場", map:"Piazza San Marco Venice"},
+     {n:"沉船書店 Libreria Acqua Alta", map:"Libreria Acqua Alta Venice"},
+     {n:"彩虹島 Burano", map:"Burano Venice"},
+     {n:"在地小酒館（bacaro）", d:"站著喝一杯配 cicchetti 小點"},
+     {n:"夕陽貢多拉"},
+   ]},
+  {country:"義大利", area:"米蘭・威尼斯・佛羅倫斯・羅馬等", type:"冰淇淋", title:"義大利 Gelato 15 間懶人包", src:"Instagram @anan.littlediary",
    url:"https://www.instagram.com/p/DVn-K6kCU94/",
-   items:[], pending:"店名還沒整理，傳貼文截圖或說明文字過來就會補上"},
+   note:"★ 是作者特別推薦的；我們會去的是威尼斯、佛羅倫斯、羅馬。",
+   items:[
+     {n:"威尼斯・Gelateria Gallonetto ★", d:"作者心中威尼斯第一，開心果、Stracciatella，兩球 €3.5", map:"Gelateria Gallonetto Venice"},
+     {n:"威尼斯・GROM", d:"開心果帶鹹味，兩球 €4.7", map:"GROM Venezia"},
+     {n:"威尼斯・Murano gelateria artigianale", d:"彩色玻璃島上的名店，作者覺得偏水，兩球 €4", map:"Murano gelateria artigianale"},
+     {n:"佛羅倫斯・La Strega Nocciola（Duomo 店）★", d:"薰衣草口味很驚豔，佛手柑也熱門，兩球 €4.2", map:"La Strega Nocciola Firenze Duomo"},
+     {n:"佛羅倫斯・Gelateria Della Passera ★", d:"得獎店，無花果、蒙娜麗莎口味，兩球 €4", map:"Gelateria Della Passera Firenze"},
+     {n:"佛羅倫斯・La Gelatiera ★", d:"有烏龍、鐵觀音、伯爵茶口味，兩球 €3", map:"La Gelatiera Firenze"},
+     {n:"佛羅倫斯・My Sugar ★", d:"開心果超濃，作者發文時 Google 寫暫時關閉，去前先查", map:"My Sugar gelato Firenze"},
+     {n:"佛羅倫斯・Gelateria La Carraia", d:"便宜大份，三球 €3", map:"Gelateria La Carraia Firenze"},
+     {n:"羅馬・Giolitti ★", d:"老字號，上面加鮮奶油，三球 €5.5", map:"Giolitti Roma"},
+     {n:"羅馬・Old Bridge Gelateria", d:"梵蒂岡旁，三球 €3–6.5", map:"Old Bridge Gelateria Roma"},
+     {n:"羅馬・Gelateria Maximo", d:"鬥獸場附近，花生很香，三球 €3.5", map:"Gelateria Maximo Roma"},
+     {n:"羅馬機場・Venchi ★", d:"回程在機場吃，三球 €5", map:"Venchi Fiumicino Airport"},
+     {n:"米蘭・Ciacoo ★", d:"米蘭大教堂旁", map:"Ciacoo Milano"},
+     {n:"五漁村・Gelateria Sorbetteria 5 Terre", d:"在 Manarola", map:"Gelateria 5 Terre Manarola"},
+     {n:"拿坡里・Mennella Il Gelato", d:"當地連鎖，便宜大支", map:"Mennella Il Gelato Napoli"},
+   ]},
+  {country:"義大利", area:"卡布里島（拿坡里外海）", type:"景點", title:"卡布里島藍洞", src:"Instagram @ygt1016",
+   url:"https://www.instagram.com/reel/C-P28daC0x_/",
+   note:"不在目前的路線上。冬天海浪大時藍洞常關閉，能不能進去要看當天海況。",
+   items:[{n:"藍洞 Grotta Azzurra", d:"作者跟團搭小船進洞", map:"Grotta Azzurra Capri"}]},
 ];
 /* ======================= 資料到此為止 ======================= */
 
@@ -1011,7 +1049,7 @@ function renderSv(){
   const card = r => {
     const items = r.items && r.items.length ? `<ul>${r.items.map(it => `<li><b>${esc(it.n)}</b>${it.d ? ` <small>${esc(it.d)}</small>` : ""}${it.map ? ` <a class="maplink" href="${mapUrl(it.map)}" target="_blank" rel="noopener">地圖</a>` : ""}</li>`).join("")}</ul>` : "";
     return `<div class="ref" style="--c:${COLORS[cur.seg]}"><div class="ref-top"><span class="mode">${esc(r.type)}</span><b>${esc(r.title)}</b></div>
-      <div class="rn">${esc(r.area)}</div>${items}
+      <div class="rn">${esc(r.area)}${r.note ? "・" + esc(r.note) : ""}</div>${items}
       ${r.pending ? `<div class="pend">${esc(r.pending)}</div>` : ""}
       ${r.url ? `<a class="src" href="${esc(r.url)}" target="_blank" rel="noopener">看原文（${esc(r.src || "連結")}）</a>` : ""}</div>`;
   };
