@@ -162,6 +162,13 @@ ol.plan li:first-child{border-top:0}
 .file{position:relative;display:inline-flex;align-items:center}
 .file img{width:56px;height:56px;object-fit:cover;border-radius:8px;border:1px solid var(--line);display:block;background:var(--soft)}
 .file .pdf{display:inline-block;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;padding:5px 10px;border-radius:8px;border:1px solid var(--line);background:var(--soft);text-decoration:none}
+.viewer{position:fixed;inset:0;z-index:100;background:rgba(10,12,16,.92);display:flex;flex-direction:column}
+.viewer .vbar{display:flex;align-items:center;gap:8px;padding:10px 14px;padding-top:calc(10px + env(safe-area-inset-top,0px));color:#fff;font-size:14px}
+.viewer .vbar b{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500}
+.viewer .vbar button{color:#fff;border:1px solid rgba(255,255,255,.35);border-radius:999px;padding:5px 12px;font-size:13px;white-space:nowrap}
+.viewer .vbody{flex:1;overflow:auto;-webkit-overflow-scrolling:touch;padding:0 12px 24px;display:flex;flex-direction:column;align-items:center;gap:12px}
+.viewer .vbody img,.viewer .vbody canvas{max-width:100%;height:auto;background:#fff;border-radius:4px;box-shadow:0 2px 12px rgba(0,0,0,.4)}
+.viewer .vmsg{color:#ddd;font-size:14px;margin-top:40px;text-align:center}
 .fdel{position:absolute;top:-6px;right:-6px;min-width:20px;height:20px;padding:0 5px;border-radius:999px;background:var(--ink);color:var(--surface);font-size:12px;line-height:20px}
 .fdel.armed{background:var(--bad);color:var(--surface);white-space:nowrap}
 .up{display:inline-flex;align-items:center;font-size:12.5px;padding:5px 10px;border-radius:8px;border:1px dashed var(--muted);color:var(--muted);cursor:pointer}
@@ -946,6 +953,58 @@ async function removeFile(id, fid){
   render();
 })();
 
+/* 檔案檢視：在頁面內開啟圖片和 PDF（App 裡開新分頁常常是空白） */
+let pdfLib = null;
+function loadScript(src){ return new Promise((res, rej) => { const s = document.createElement("script"); s.src = src; s.onload = res; s.onerror = rej; document.head.appendChild(s); }); }
+async function getPdfLib(){
+  if (pdfLib) return pdfLib;
+  const base = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/";
+  await loadScript(base + "pdf.min.js");
+  await loadScript(base + "pdf.worker.min.js"); // 在主執行緒跑，不另開 worker
+  pdfLib = window.pdfjsLib; pdfLib._cmap = base + "cmaps/";
+  return pdfLib;
+}
+let viewerData = null;
+async function openViewer(id, type, name){
+  closeViewer();
+  const ov = document.createElement("div"); ov.className = "viewer"; ov.id = "viewer";
+  ov.innerHTML = `<div class="vbar"><b></b><button data-vdl hidden>下載</button><button data-vclose>關閉</button></div><div class="vbody"><div class="vmsg">載入中…</div></div>`;
+  ov.querySelector("b").textContent = name;
+  document.body.appendChild(ov); document.body.style.overflow = "hidden";
+  const body = ov.querySelector(".vbody");
+  try {
+    const r = await fetch("/_blob/" + id); if (!r.ok) throw new Error("http " + r.status);
+    const buf = await r.arrayBuffer(); viewerData = {buf, name, type};
+    window.claude?.use && window.claude.use("downloads").then(d => { if (d && document.getElementById("viewer") === ov) { viewerData.dl = d; ov.querySelector("[data-vdl]").hidden = false; } });
+    if (/^image\//.test(type)) {
+      const img = new Image(); img.src = URL.createObjectURL(new Blob([buf], {type})); img.alt = name;
+      body.innerHTML = ""; body.appendChild(img);
+    } else {
+      const lib = await getPdfLib();
+      const pdf = await lib.getDocument({data: new Uint8Array(buf.slice(0)), cMapUrl: lib._cmap, cMapPacked: true}).promise;
+      body.innerHTML = "";
+      const w = Math.min(body.clientWidth - 24, 900), dpr = Math.min(window.devicePixelRatio || 1, 2);
+      for (let i = 1; i <= pdf.numPages; i++) {
+        if (document.getElementById("viewer") !== ov) return;
+        const page = await pdf.getPage(i);
+        const vp0 = page.getViewport({scale: 1}); const vp = page.getViewport({scale: w / vp0.width * dpr});
+        const cv = document.createElement("canvas"); cv.width = vp.width; cv.height = vp.height; cv.style.width = (vp.width / dpr) + "px";
+        body.appendChild(cv);
+        await page.render({canvasContext: cv.getContext("2d"), viewport: vp}).promise;
+      }
+    }
+  } catch(e) {
+    body.innerHTML = `<div class="vmsg">打不開這個檔案。<br>如果你不是這個行程頁的擁有者或編輯者，可能沒有權限看附件。</div>`;
+  }
+}
+function closeViewer(){ const ov = document.getElementById("viewer"); if (ov) { ov.remove(); document.body.style.overflow = ""; } viewerData = null; }
+async function downloadViewer(){
+  if (!viewerData || !viewerData.dl) return;
+  let fn = viewerData.name; if (!/\.[a-z0-9]+$/i.test(fn)) fn += viewerData.type === "application/pdf" ? ".pdf" : ".jpg";
+  try { await viewerData.dl.save({filename: fn, data: new Blob([viewerData.buf], {type: viewerData.type})}); } catch(e) {}
+}
+document.addEventListener("keydown", e => { if (e.key === "Escape") closeViewer(); });
+
 const dayById = id => DAYS.find(d => d.id === id);
 const TODAY = (() => { const n = new Date(); return new Date(n.getFullYear(), n.getMonth(), n.getDate()); })();
 const dayDate = d => new Date(sy, sm - 1, sd + d.i);
@@ -968,7 +1027,7 @@ function todoRow(b, showDay){
   const files = fl.length || (ASSETS && DB) ? `<div class="files">${fl.map(f => {
       const u = "/_blob/" + f.id; const img = /^image\//.test(f.type);
       const del = ASSETS ? `<button class="fdel ${ARMED[b.id + f.id] ? "armed" : ""}" data-fdel="${esc(b.id)}|${esc(f.id)}" aria-label="刪除 ${esc(f.name)}">${ARMED[b.id + f.id] ? "確定刪除？" : "×"}</button>` : "";
-      return `<span class="file">${img ? `<a href="${u}" target="_blank" rel="noopener"><img src="${u}" alt="${esc(f.name)}" loading="lazy"></a>` : `<a class="pdf" href="${u}" target="_blank" rel="noopener">PDF・${esc(f.name)}</a>`}${del}</span>`;
+      return `<span class="file">${img ? `<a href="${u}" data-view="${esc(f.id)}|${esc(f.type)}|${esc(f.name)}"><img src="${u}" alt="${esc(f.name)}" loading="lazy"></a>` : `<a class="pdf" href="${u}" data-view="${esc(f.id)}|${esc(f.type)}|${esc(f.name)}">PDF・${esc(f.name)}</a>`}${del}</span>`;
     }).join("")}${ASSETS && DB ? `<label class="up">${UPLOADING[b.id] ? "上傳中…" : "＋ 上傳確認信／票券"}<input type="file" accept="image/*,application/pdf,.pdf" multiple data-up="${esc(b.id)}" ${UPLOADING[b.id] ? "disabled" : ""}></label>` : ""}${upMsg[b.id] ? `<span class="upmsg">${esc(upMsg[b.id])}</span>` : ""}</div>` : "";
   return `<div class="todo ${done ? "is-done" : ""}">${st}<div><span class="itm">${esc(b.item)}</span>${meta ? `<small>${meta}</small>` : ""}${gyg}${files}</div>${dayBtn}</div>`;
 }
@@ -1095,6 +1154,9 @@ function go(i, toDay){
   if (scrollY > mainTop) scrollTo({top: Math.max(0, mainTop), behavior: "smooth"});
 }
 document.addEventListener("click", e => {
+  const vw = e.target.closest("[data-view]"); if (vw) { e.preventDefault(); const [id, type, ...n] = vw.dataset.view.split("|"); openViewer(id, type, n.join("|")); return; }
+  if (e.target.closest("[data-vclose]")) { closeViewer(); return; }
+  if (e.target.closest("[data-vdl]")) { downloadViewer(); return; }
   const tk = e.target.closest("[data-tick]"); if (tk) { toggleBooked(tk.dataset.tick); return; }
   const fd = e.target.closest("[data-fdel]"); if (fd) { const [bid, fid] = fd.dataset.fdel.split("|"); removeFile(bid, fid); return; }
   const ct = e.target.closest("[data-country]"); if (ct) { state.country = ct.dataset.country; render(); return; }
