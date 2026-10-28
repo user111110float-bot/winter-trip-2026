@@ -430,15 +430,15 @@ const DAYS = [
       {t:"08:00", title:"退房、行李寄放到 迪士尼園區飯店", desc:"從湖畔飯店走約 15 分鐘，行李先放櫃台（房間 15:00 後才能進）", map:"Disneyland Park Paris"},
       {t:"08:30", title:"Disney Adventure World", desc:"住客提早一小時入園，直衝 World of Frozen 艾倫戴爾港口", map:"Disney Adventure World Paris"},
       {t:"11:30", title:"Avengers Campus", desc:"漫威園區，午餐在聖誕市集吃烤起司＋熱紅酒"},
-      {t:"15:00", title:"入住 迪士尼園區飯店・看聖誕遊行", desc:"Classic 露臺房；再走到 Disneyland Park 看下午場的米奇聖誕遊行", map:"Disneyland Park Paris"},
-      {t:"晚餐", title:"聖誕晚餐（用 Premium 餐券）", desc:"可選 Royal Banquet、Auberge de Cendrillon 等角色餐廳，餐廳待訂"},
+      {t:"15:00", title:"入住 迪士尼園區飯店", desc:"Classic 露臺房；聖誕遊行時間看 App，跟晚餐錯開就好", map:"Disneyland Park Paris"},
+      {t:"16:45", title:"聖誕晚餐 Bistrot Chez Rémy（已訂）", desc:"Disney Adventure World 的料理鼠王餐廳，坐在放大的廚房裡吃法式料理；從飯店走約 10 分鐘，提早 10 分鐘報到", map:"Bistrot Chez Remy Disneyland Paris"},
       {t:"夜間", title:"Disney Tales of Magic（已訂觀賞區）", desc:"睡美人城堡的聖誕夜間秀，保留觀賞區"},
     ],
     hl:[
       {tag:"新園區", title:"World of Frozen", desc:"今年第一個聖誕季，艾莎城堡在雪中發光；Anna、Elsa 見面要搶虛擬排隊"},
       {tag:"住宿", title:"城堡飯店", desc:"迪士尼園區飯店 就蓋在樂園入口上方，聖誕夜住在城堡旁"},
     ],
-    tips:"Anna 和 Elsa 的見面在 8:45 開放 App 虛擬排隊。兩天兩園門票可以兩個園區進出。Premium 餐券可用在 Auberge de Cendrillon、Royal Banquet、La Table de Lumière，餐廳要先在 App 訂位，訂不到就換一間。",
+    tips:"Anna 和 Elsa 的見面在 8:45 開放 App 虛擬排隊。兩天兩園門票可以兩個園區進出。聖誕晚餐已訂 Bistrot Chez Rémy（12/25 16:45，2 位），用餐前在 App 確認可以用哪種餐券。",
     stay:"迪士尼園區飯店・Classic 露臺房（1 晚）", transport:"全天步行・平均 18k 步", temp:"5°C・體感 2°C 風大" },
 
   { seg:"par", city:"Outlet → 巴黎精品街", short:"精品購物", theme:"購物日・把巴黎的閃亮帶回家",
@@ -606,7 +606,7 @@ const BOOKINGS = [
   {id:"flight-rvn-cdg", item:"羅瓦涅米 → 巴黎機票", day:"D5", status:"待訂", where:"芬蘭航空或其他航空官網", note:"去程是土耳其航空的單獨機票，這段要另外訂"},
   {id:"hotel-newport", item:"湖畔飯店（12/23–24，2 晚）＋門票、Plus 餐券、PhotoPass+、夜間秀觀賞區、機場接駁", day:"D5", status:"已訂", where:"迪士尼官網", note:"入住前 7 天可免費更改或取消"},
   {id:"hotel-disney", item:"迪士尼園區飯店（12/25，1 晚）＋兩天兩園門票、Premium 餐券", day:"D7", status:"已訂", where:"迪士尼官網", note:"入住前 7 天可免費更改或取消"},
-  {id:"dinner-xmas-eve", item:"迪士尼晚餐訂位（12/24、12/25，用餐券）", day:"D6", status:"待訂", where:"迪士尼 App", opens:60, note:"餐廳可能會換，訂得到哪間就去哪間；Plus 和 Premium 券能用的餐廳不同"},
+  {id:"dinner-xmas-eve", item:"迪士尼晚餐訂位（12/24 平安夜還沒訂）", day:"D6", status:"待訂", where:"迪士尼 App", opens:60, note:"12/25 已訂 Bistrot Chez Rémy 16:45；12/24 用 Plus 餐券，訂得到哪間就去哪間"},
   {id:"apt-marais", item:"瑪黑公寓（12/26–27，2 晚）", day:"D8", status:"待訂", where:"訂房網站", note:"確認入住時間可以晚到"},
   {id:"louvre", item:"羅浮宮時段票", day:"D9", status:"待訂", where:"ticket.louvre.fr", opens:120, note:"非歐盟 €32；週二休館"},
   {id:"jules-verne", item:"Le Jules Verne 晚餐", day:"D9", status:"待訂", where:"Jules Verne 官網", opens:90, note:"品嚐菜單約 €295 起；男士要穿西裝外套"},
@@ -695,7 +695,7 @@ const GUIDES = [
    now 已開放、最快被訂光；watch 還沒開放，開賣當天要搶；later 不急，只會越晚越貴
    每項 [等級, 為什麼]；預訂 id 對應 BOOKINGS */
 const URGENT = {
-  "dinner-xmas-eve": ["now", "約 10/25 已開放；平安夜、聖誕節是全年最難訂的兩天"],
+  "dinner-xmas-eve": ["now", "12/25 已訂到；平安夜還沒訂，是全年最難訂的一天"],
   "jules-verne":     ["now", "9 月底已開放；聖誕週晚餐時段最先滿"],
   "tour-santa":      ["now", "聖誕週是拉普蘭最旺的時候，團體名額有限"],
   "tour-ranua":      ["now", "聖誕週名額有限，評價數少的團更要早確認"],
