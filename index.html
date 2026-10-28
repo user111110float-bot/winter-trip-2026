@@ -197,6 +197,17 @@ ol.plan li:first-child{border-top:0}
 .prep div{background:var(--surface);padding:10px 14px}
 .prep dt{font-weight:700;font-size:14.5px}
 .prep dd{margin:2px 0 0;font-size:14px;color:var(--muted)}
+/* 搶票 */
+.ugsec{margin-bottom:26px}
+.ugsec h3{font-size:15px;margin:0 0 2px;display:flex;align-items:baseline;gap:10px}
+.ugsec h3 small{font-weight:400;font-size:12.5px;color:var(--muted)}
+.ugsec .ugd{margin:0 0 10px;font-size:13px;color:var(--muted)}
+.ug-now h3{color:var(--bad)}
+.ug-watch h3{color:var(--warn)}
+.ug-later h3{color:var(--ok)}
+.todo .why{display:block;font-size:12.5px;font-weight:700;color:var(--warn);margin-bottom:2px}
+.ug-now .todo .why{color:var(--bad)}
+.ug-later .todo .why{color:var(--muted);font-weight:400}
 /* 收藏指南 */
 .ctabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
 .ctab{padding:6px 14px;border-radius:999px;border:1px solid var(--line);background:var(--surface);font-size:14px;font-weight:500}
@@ -271,6 +282,7 @@ ol.plan li:first-child{border-top:0}
       <button class="tab" role="tab" id="tab-ov" data-tab="ov">總覽</button>
       <button class="tab" role="tab" id="tab-tr" data-tab="tr">交通</button>
       <button class="tab" role="tab" id="tab-sv" data-tab="sv">收藏指南<span class="n" id="svCount"></span></button>
+      <button class="tab" role="tab" id="tab-ug" data-tab="ug">搶票<span class="n" id="ugCount"></span></button>
       <button class="tab" role="tab" id="tab-bk" data-tab="bk">預訂與準備<span class="n" id="bkCount"></span></button>
     </div>
     <div class="strip" id="strip"></div>
@@ -679,6 +691,38 @@ const GUIDES = [
   {t:"道奇宮", need:"可選", d:"可以自己逛；「秘密路線」導覽要另外預約。"},
   {t:"迪士尼、羅浮宮、百花圓頂、聖彼得", need:"不用", d:"自己去就好，重點是先訂好時段票。"},
 ];
+/* 搶票清單：哪些預訂要先搶（機票不列）
+   now 已開放、最快被訂光；watch 還沒開放，開賣當天要搶；later 不急，只會越晚越貴
+   每項 [等級, 為什麼]；預訂 id 對應 BOOKINGS */
+const URGENT = {
+  "dinner-xmas-eve": ["now", "約 10/25 已開放；平安夜、聖誕節是全年最難訂的兩天"],
+  "jules-verne":     ["now", "9 月底已開放；聖誕週晚餐時段最先滿"],
+  "tour-santa":      ["now", "聖誕週是拉普蘭最旺的時候，團體名額有限"],
+  "tour-ranua":      ["now", "聖誕週名額有限，評價數少的團更要早確認"],
+  "tour-aurora":     ["now", "聖誕週名額有限"],
+  "apt-rome":        ["now", "含跨年夜，Trastevere 越晚越貴、選擇越少"],
+  "apt-marais":      ["now", "聖誕後的巴黎週末，公寓選擇會越來越少"],
+  "hotel-venice":    ["now", "聖誕到新年之間是旺季"],
+  "hotel-florence":  ["now", "12/30 跨年前夕，價格會漲"],
+  "dinner-nye":      ["now", "跨年套餐通常 11 月就開始被訂走；先訂可免費取消的"],
+  "lunch-newyear":   ["now", "1/1 很多餐廳不開，有開的很快就滿"],
+  "colosseum":       ["watch", "官網 12/1 開賣（30 天前），含地下層的票幾分鐘就光，當天一早上去搶"],
+  "pantheon":        ["watch", "約 12/1 開放，不難訂"],
+  "vatican-tour":    ["watch", "GetYourGuide 現在就能訂；1/2 是週六，建議 11 月上旬訂好"],
+  "duomo-dome":      ["later", "假期時段會少，11 月訂好就好"],
+  "train-vce-flr":   ["later", "不太會買不到，只是越晚越貴"],
+  "train-flr-rome":  ["later", "不太會買不到，只是越晚越貴"],
+  "venice-sanmarco": ["later", "冬天不難訂"],
+  "seine-cruise":    ["later", "現場買也可以"],
+  "gondola":         ["later", "現場包船即可"],
+  "stpeter-dome":    ["later", "當天排隊也可以"],
+};
+const UG_LEVELS = [
+  {k:"now", t:"現在就訂", d:"已經開放，而且最容易被訂光"},
+  {k:"watch", t:"記得開賣日", d:"還沒開放或快要該訂了，開賣當天去搶"},
+  {k:"later", t:"不急", d:"晚點訂也買得到"},
+];
+
 /* 收藏指南：貼來的 IG / 文章，依國家分頁
    country 芬蘭/法國/義大利；area 區域；type 餐廳/景點/購物/攻略；
    items 列出的店家或重點 {n 名稱, d 說明, map 地圖搜尋字}；pending 內容還沒整理時的說明 */
@@ -856,8 +900,8 @@ let state = { tab: "day", day: 0, country: "法國" };
 { const sc = store.get("hm-country"); if (COUNTRIES.some(c => c.k === sc)) state.country = sc; }
 const h = location.hash.replace("#", "").toLowerCase();
 if (/^d\d+$/.test(h) && +h.slice(1) <= DAYS.length) state.day = +h.slice(1) - 1;
-else if (["day","ov","tr","sv","bk"].includes(h)) state.tab = h;
-else { const sd2 = +store.get("hm-day"); if (sd2 >= 0 && sd2 < DAYS.length) state.day = sd2; const st = store.get("hm-tab"); if (["day","ov","tr","sv","bk"].includes(st)) state.tab = st; }
+else if (["day","ov","tr","sv","ug","bk"].includes(h)) state.tab = h;
+else { const sd2 = +store.get("hm-day"); if (sd2 >= 0 && sd2 < DAYS.length) state.day = sd2; const st = store.get("hm-tab"); if (["day","ov","tr","sv","ug","bk"].includes(st)) state.tab = st; }
 
 // header
 document.getElementById("tripTitle").textContent = TRIP.title;
@@ -1127,6 +1171,20 @@ function renderBk(){
   </div>`;
 }
 
+function renderUg(){
+  const secs = UG_LEVELS.map(L => {
+    const list = BOOKINGS.filter(b => URGENT[b.id] && URGENT[b.id][0] === L.k);
+    if (!list.length) return "";
+    const left = list.filter(b => !isDone(b)).length;
+    const rows = list.map(b => {
+      const row = todoRow(b, true);
+      return row.replace('<div><span class="itm">', `<div><span class="why">${esc(URGENT[b.id][1])}</span><span class="itm">`);
+    }).join("");
+    return `<section class="ugsec ug-${L.k}"><h3>${esc(L.t)}<small>${left ? `還有 ${left} 項` : "全部訂好了 ✓"}</small></h3><p class="ugd">${esc(L.d)}</p><div class="list">${rows}</div></section>`;
+  }).join("");
+  return `<div class="bk"><p class="lead">機票不列在這裡。訂好就打勾，位置不會變。</p>${secs}</div>`;
+}
+
 function renderSv(){
   const cur = COUNTRIES.find(c => c.k === state.country) || COUNTRIES[0];
   const tabs = COUNTRIES.map(c => `<button class="ctab" data-country="${esc(c.k)}" style="--c:${COLORS[c.seg]}" aria-selected="${c.k === cur.k}">${esc(c.k)}<span class="n">${REFS.filter(r => r.country === c.k).length}</span></button>`).join("");
@@ -1145,7 +1203,8 @@ function renderSv(){
 function render(){
   document.querySelectorAll(".tab").forEach(t => t.setAttribute("aria-selected", t.dataset.tab === state.tab));
   const main = document.getElementById("main");
-  main.innerHTML = state.tab === "day" ? renderDay() : state.tab === "ov" ? renderOv() : state.tab === "tr" ? renderTr() : state.tab === "sv" ? renderSv() : renderBk();
+  main.innerHTML = state.tab === "day" ? renderDay() : state.tab === "ov" ? renderOv() : state.tab === "tr" ? renderTr() : state.tab === "sv" ? renderSv() : state.tab === "ug" ? renderUg() : renderBk();
+  { const n = BOOKINGS.filter(b => URGENT[b.id] && URGENT[b.id][0] === "now" && !isDone(b)).length; document.getElementById("ugCount").textContent = n || "✓"; }
   document.getElementById("svCount").textContent = REFS.length || "";
   renderStrip();
   drawMaps();
