@@ -345,17 +345,17 @@ const DAYS = [
     hops:[["Santa Claus Village Rovaniemi","start"],["Santa Claus Village Rovaniemi","car"],["Santa Claus Village Rovaniemi","car"]],
     plan:[
       {t:"08:00", title:"早餐", desc:"在飯店吃早餐（房價已含）"},
-      {t:"09:30", title:"業者到玻璃屋接", desc:"GetYourGuide 一日行程，借你們保暖衣"},
+      {t:"08:45", title:"走到集合點（已保留）", desc:"Arctic Circle Snowmobile Park（Joulumaantie 5），就在聖誕老人村裡，從玻璃屋走約 10 分鐘；09:00 集合，遲到不退款。業者會借保暖衣", map:"Arctic Circle Snowmobile Park Joulumaantie 5 Rovaniemi"},
       {t:"上午", title:"馴鹿雪橇 + 哈士奇雪橇", desc:"在森林裡只聽得到鈴鐺；哈士奇起跑那一刻的爆發力，會讓人直接尖叫"},
       {t:"中午", title:"鮭魚湯午餐", desc:"芬蘭傳統鮭魚湯（有素食選項）"},
       {t:"下午", title:"跨越北極圈・聖誕老人村", desc:"手牽手跨越 66°33′；自由時間去聖誕老人郵局，寄一封給一年後的自己", map:"Santa Claus Village Rovaniemi"},
-      {t:"16:00", title:"送回玻璃屋", desc:"休息、泡澡，晚上第二晚玻璃屋"},
+      {t:"15:00", title:"走回玻璃屋", desc:"行程結束在同一個集合點，走回去約 10 分鐘；休息、泡澡，晚上第二晚玻璃屋"},
     ],
     hl:[
       {tag:"必訪", title:"聖誕老人辦公室", desc:"自由時間可以排隊見聖誕老人，記得說是蜜月；拍照是另外收費"},
       {tag:"蜜月", title:"跨越北極圈", desc:"手牽手站上 66°33′ 的白線，可以在郵局旁蓋北極圈紀念章"},
     ],
-    tips:"訂聖誕老人村行程時，接送地點要選或備註 森林玻璃屋，並確認結束後也送回玻璃屋；業者的接送時間 12 月大約在 9–11 點，前一天會通知。郵局明信片要寫中文＋英文地址，選聖誕期間寄出會在明年聖誕才到。",
+    tips:"行程不含飯店接送，集合點在聖誕老人村裡，走路就到；業者會在 1–2 天前聯絡確認時間。郵局明信片要寫中文＋英文地址，選聖誕期間寄出會在明年聖誕才到。",
     stay:"森林玻璃屋・第二晚", transport:"行程業者接送", temp:"-15°C ~ -20°C・體感更冷" },
 
   { seg:"lap", city:"雪地摩托・聖誕老人村逛街", short:"雪地摩托＋逛街", theme:"冬至・一年最長的夜",
@@ -598,7 +598,7 @@ const DAYS = [
 /* 預訂清單：id 固定不要改（勾選紀錄靠它對應）；status "待訂"|"已訂"（頁面上勾選的會蓋過這裡）；opens = 幾天前開放預訂（不填代表現在就能訂）；where = 去哪訂；gyg = GetYourGuide 連結 {url, price, rating} */
 const BOOKINGS = [
   {id:"flight-out", item:"去程機票 台北 → 伊斯坦堡 → 羅瓦涅米（TK25 + TK1749）", day:"D1", status:"已訂", where:"土耳其航空", note:"；FlexFly 經濟艙，托運 30 公斤，可改票（要收手續費）"},
-  {id:"tour-santa", item:"聖誕老人村 + 馴鹿、哈士奇雪橇（6 小時）", day:"D2", status:"待訂", where:"GetYourGuide", gyg:{url:"https://www.getyourguide.com/rovaniemi-l2653/rovaniemi-reindeer-huskies-and-santa-claus-experience-t301148/", price:"US$211 起／人", rating:"4.6（2,417 則）"}, note:"含接送、午餐、保暖衣；接送地點填 森林玻璃屋，並確認結束也送回玻璃屋"},
+  {id:"tour-santa", item:"聖誕老人村 + 馴鹿、哈士奇雪橇（6 小時）", day:"D2", status:"待訂", where:"GetYourGuide", gyg:{url:"https://www.getyourguide.com/rovaniemi-l2653/rovaniemi-reindeer-huskies-and-santa-claus-experience-t301148/", price:"保留中 US$418.40（2 人），12/25 自動扣款", rating:"4.6（2,417 則）"}, note:"09:00 在 Arctic Circle Snowmobile Park（Joulumaantie 5）集合；⚠ 確認信寫 12/27 08:45 前可免費取消，日期可能訂成 12/28，要改成 12/20"},
   {id:"tour-snowmobile", item:"雪地摩托 2025 年新車（12/21 09:00，3 小時）", day:"D3", status:"已訂", where:"GetYourGuide", gyg:{url:"https://www.getyourguide.com/rovaniemi-l2653/rovaniemi-safari-mobil-salju-barbeque-di-hutan-belantara-berpemandu-t699161/", price:"已付 US$266.92（2 人）", rating:"4.7（2,288 則）"}, note:"08:40 前到 Arctic GM 市中心辦公室（Valtakatu 26），不含接送；駕駛要帶駕照"},
   {id:"hotel-igloo", item:"森林玻璃屋套房（4 晚，12/19–12/23）", day:"D1", status:"已訂", where:"飯店官網", note:"已全額付清、不可退改；含早餐、季節戶外裝備，加購玫瑰花束；16:00 入住、11:00 退房"},
   {id:"tour-ranua", item:"Ranua 動物園半日團（5 小時）", day:"D4", status:"待訂", where:"GetYourGuide", gyg:{url:"https://www.getyourguide.com/rovaniemi-l2653/rovaniemi-ranua-zoo-wildlife-park-tour-with-hotel-pickup-t840912/", price:"US$129 起／人", rating:"4.6（7 則，評價數少）"}, note:"含飯店接送、門票、英文導遊"},
@@ -635,7 +635,7 @@ const LEGS = [
   {day:"D1", from:"羅瓦涅米機場", to:"森林玻璃屋", mode:"計程車", how:"機場外排班計程車，約 10 分鐘、約 €20–30。", tip:"不用預約；當地叫車也可以用 Meneva App。"},
   {day:"D1", from:"森林玻璃屋", to:"羅瓦涅米市中心", mode:"計程車", how:"請櫃台叫車，約 15 分鐘、約 €25–35。", tip:""},
   {day:"D1", from:"市中心", to:"森林玻璃屋", mode:"計程車", how:"晚餐後請餐廳或用 Meneva App 叫車，約 15 分鐘。", tip:"晚上車少，吃完前先叫。"},
-  {day:"D2", from:"森林玻璃屋", to:"聖誕老人村、馴鹿、哈士奇", mode:"行程接送", how:"GetYourGuide 行程的業者到玻璃屋接，結束送回玻璃屋。", tip:"訂的時候接送地點填 森林玻璃屋；玻璃屋 的房間分散在森林裡，櫃台有接駁車送到房間。"},
+  {day:"D2", from:"森林玻璃屋", to:"Arctic Circle Snowmobile Park（集合點）", mode:"步行", how:"走約 10 分鐘到聖誕老人村裡的 Joulumaantie 5，09:00 集合；行程結束在同一個地方解散。", tip:"天冷路滑，不想走可以請櫃台叫車；玻璃屋 的房間分散在森林裡，櫃台有接駁車送到大廳。"},
   {day:"D3", from:"森林玻璃屋", to:"Arctic GM 市中心辦公室", mode:"計程車", how:"08:15 出發，約 15 分鐘；08:40 前報到（Valtakatu 26）。行程結束回到同一個辦公室。", tip:"前一晚請飯店櫃台幫忙預約隔天早上的計程車，或用 Meneva App 叫車。"},
   {day:"D3", from:"市中心", to:"聖誕老人村", mode:"計程車", how:"吃完午餐搭計程車約 15 分鐘。", tip:""},
   {day:"D3", from:"聖誕老人村", to:"森林玻璃屋", mode:"計程車", how:"約 10 分鐘，請商店或用 Meneva App 叫車。", tip:""},
@@ -697,7 +697,7 @@ const GUIDES = [
 const URGENT = {
   "dinner-xmas-eve": ["now", "12/25 已訂到；平安夜還沒訂，是全年最難訂的一天"],
   "jules-verne":     ["now", "9 月底已開放；聖誕週晚餐時段最先滿"],
-  "tour-santa":      ["now", "聖誕週是拉普蘭最旺的時候，團體名額有限"],
+  "tour-santa":      ["now", "已保留，但日期可能訂成 12/28，要先確認改成 12/20"],
   "tour-ranua":      ["now", "聖誕週名額有限，評價數少的團更要早確認"],
   "tour-aurora":     ["now", "聖誕週名額有限"],
   "apt-rome":        ["now", "含跨年夜，Trastevere 越晚越貴、選擇越少"],
