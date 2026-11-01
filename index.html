@@ -197,6 +197,11 @@ ol.plan li:first-child{border-top:0}
 .prep div{background:var(--surface);padding:10px 14px}
 .prep dt{font-weight:700;font-size:14.5px}
 .prep dd{margin:2px 0 0;font-size:14px;color:var(--muted)}
+/* 路線地圖截圖 */
+.mapimg{margin:16px 0 0}
+.mapimg img{display:block;width:100%;height:auto;aspect-ratio:739/416;border-radius:12px;border:1px solid var(--line);background:var(--soft)}
+.mapimg figcaption{font-size:12px;color:var(--muted);margin-top:6px}
+.ovlist .mapimg{margin:0 0 14px}
 /* 搶票 */
 .ugsec{margin-bottom:26px}
 .ugsec h3{font-size:15px;margin:0 0 2px;display:flex;align-items:baseline;gap:10px}
@@ -804,6 +809,8 @@ const REFS = [
    note:"不在目前的路線上。冬天海浪大時藍洞常關閉，能不能進去要看當天海況。",
    items:[{n:"藍洞 Grotta Azzurra", d:"作者跟團搭小船進洞", map:"Grotta Azzurra Capri"}]},
 ];
+/* 每天的路線地圖：從公開版截圖後上傳成附件（id）。改了某天的路線，要重新截那天的圖 */
+const MAPIMG = {};
 /* ======================= 資料到此為止 ======================= */
 
 const COORDS = {"Taipei Taoyuan Airport": [25.0797, 121.2342], "Helsinki Airport": [60.3172, 24.9633], "Rovaniemi Airport": [66.558, 25.8275], "Rovaniemi city centre": [66.503, 25.729], "Santa Claus Village Rovaniemi": [66.5435, 25.8476], "Jätkänkynttilä Bridge Rovaniemi": [66.4981, 25.7128], "Lordi's Square Rovaniemi": [66.5032, 25.7291], "SantaPark Rovaniemi": [66.5378, 25.7985], "Arctic GM Rovaniemi Valtakatu 26": [66.501, 25.733], "Ranua Zoo": [65.9434, 26.467], "Paris Charles de Gaulle Airport": [49.0079, 2.5508], "Disneyland Park Paris": [48.8711, 2.7788], "迪士尼湖畔飯店": [48.8702, 2.786], "Disney Adventure World Paris": [48.8681, 2.7804], "La Vallée Village": [48.8546, 2.7838], "Le Marais Paris": [48.8612, 2.3582], "Avenue Montaigne Paris": [48.8663, 2.3045], "Rue du Faubourg Saint-Honoré Paris": [48.8695, 2.319], "Galeries Lafayette Haussmann": [48.8735, 2.332], "Louvre Museum": [48.8606, 2.3376], "Merci 111 Boulevard Beaumarchais Paris": [48.8607, 2.3668], "Bateaux Parisiens Port de la Bourdonnais": [48.8574, 2.2905], "Le Jules Verne Paris": [48.8584, 2.2945], "Venice Marco Polo Airport": [45.5047, 12.3466], "Piazza San Marco Venice": [45.4342, 12.3385], "Piazza San Marco": [45.4342, 12.3385], "Doge's Palace Venice": [45.4337, 12.3404], "Burano": [45.4854, 12.4167], "Murano": [45.458, 12.353], "Fondamente Nove Venice": [45.4425, 12.3405], "Venezia Santa Lucia": [45.4411, 12.321], "Firenze Santa Maria Novella": [43.7767, 11.2479], "Mercato Centrale Firenze": [43.7765, 11.2528], "Cattedrale di Santa Maria del Fiore": [43.7731, 11.256], "Piazzale Michelangelo": [43.7629, 11.2651], "Ponte Vecchio": [43.7679, 11.2531], "Piazza della Repubblica Florence": [43.7715, 11.254], "Roma Termini": [41.9013, 12.5016], "Trastevere Rome": [41.8848, 12.4704], "Colosseum": [41.8902, 12.4922], "Roman Forum": [41.8921, 12.4864], "Trevi Fountain": [41.9009, 12.4833], "Pantheon Rome": [41.8986, 12.4769], "Gianicolo Terrace Rome": [41.8916, 12.4614], "Spanish Steps Rome": [41.906, 12.4828], "Via dei Condotti Rome": [41.9055, 12.4805], "Piazza San Pietro": [41.9022, 12.4567], "Ponte Sant'Angelo": [41.9017, 12.4665], "Piazza Navona": [41.8992, 12.4731], "Vatican Museums": [41.9065, 12.4536], "St. Peter's Basilica": [41.9022, 12.4539], "Trattoria Da Enzo al 29 Rome": [41.8881, 12.4779], "Rome Fiumicino Airport": [41.8035, 12.2519], "Istanbul Airport": [41.2753, 28.7519]};
@@ -1058,6 +1065,7 @@ async function downloadViewer(){
 }
 document.addEventListener("keydown", e => { if (e.key === "Escape") closeViewer(); });
 
+const mapImg = k => MAPIMG[k] ? `<figure class="mapimg"><img src="/_blob/${MAPIMG[k]}" alt="${k === "ov" ? "全程路線地圖" : k + " 路線地圖"}" loading="lazy" width="739" height="416"><figcaption>${k === "ov" ? "全程路線：✈ 點狀弧線＝飛機，實線＝火車" : "數字是當天的順序，箭頭是移動方向；✈ 點狀弧線＝飛機，實線＝火車，虛線＝當地移動（點點＝搭船）"}</figcaption></figure>` : "";
 const dayById = id => DAYS.find(d => d.id === id);
 const TODAY = (() => { const n = new Date(); return new Date(n.getFullYear(), n.getMonth(), n.getDate()); })();
 const dayDate = d => new Date(sy, sm - 1, sd + d.i);
@@ -1109,6 +1117,7 @@ function renderDay(){
       <div class="nav"><button data-go="${state.day - 1}" ${prev ? "" : "disabled"} aria-label="前一天">← 前一天</button><button data-go="${state.day + 1}" ${next ? "" : "disabled"} aria-label="後一天">後一天 →</button></div></div>
     <h2>${esc(d.city)}</h2>
     <div class="theme">${esc(d.theme)}</div>
+    ${mapImg(d.id)}
     <div id="daymap" class="daymap"></div><div class="maphint">數字是當天的順序，箭頭是移動方向；✈ 點狀弧線＝飛機，實線＝火車，虛線＝當地移動（點點＝搭船）</div>
     ${routeUrl(d) ? `<a class="routebtn" href="${routeUrl(d)}" target="_blank" rel="noopener">在 Google 地圖看今天路線<span>${d.route.length} 個地點</span></a>` : ""}
     <dl class="facts"><div><dt>住宿</dt><dd>${esc(d.stay)}</dd></div><div><dt>交通</dt><dd>${esc(d.transport)}</dd></div><div><dt>氣溫</dt><dd>${esc(d.temp)}</dd></div></dl>
@@ -1145,7 +1154,7 @@ function routeSvg(){
 function renderOv(){
   const rows = DAYS.map(d => `<button class="ovrow" data-go="${d.i}" data-tabgo="day" style="--c:${d.c}"><span class="dt">${d.date}<small>${d.id} · ${d.wk}</small></span><span><span class="city">${esc(d.city)}</span><div class="acts">${d.plan.map(p => esc(p.title)).join(" · ")}</div></span><span class="stay"><b>住宿</b>${esc(d.stay)}</span></button>`).join("");
   const sum = groups.map(g => `<div style="--c:${COLORS[g.seg]}"><b>${esc(SEGMENTS[g.seg].name)}</b><span>${g.days[0].date}–${g.days[g.days.length-1].date} · ${g.days.length} 天</span></div>`).join("");
-  return `<div id="ovmap" class="daymap ovmapbox"></div><div class="maphint">全程路線：✈ 點狀弧線＝飛機，實線＝火車</div><div class="ov"><div class="ovlist">${rows}</div><div class="routebox">${routeSvg()}<div class="cap">台北出發，台北回程。點左邊任一天看詳細。</div><div class="segsum">${sum}</div></div></div>`;
+  return `<div id="ovmap" class="daymap ovmapbox"></div><div class="maphint">全程路線：✈ 點狀弧線＝飛機，實線＝火車</div><div class="ov"><div class="ovlist">${mapImg("ov")}${rows}</div><div class="routebox">${routeSvg()}<div class="cap">台北出發，台北回程。點左邊任一天看詳細。</div><div class="segsum">${sum}</div></div></div>`;
 }
 
 function renderTr(){
